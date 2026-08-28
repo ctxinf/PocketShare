@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>share</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --border: #2a2f3a;
+    --text: #e6e8eb;
+    --muted: #8a90a0;
+    --accent: #4f8cff;
+    --accent-text: #ffffff;
+    --danger: #ff5c5c;
+    --ok: #3ecf8e;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+  }
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 16px 16px 80px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 8px 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .gear {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    padding: 8px;
+    cursor: pointer;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 0;
+    text-align: center;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 15px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tab.active {
+    color: var(--accent-text);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=number], textarea {
+    width: 100%;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  button.primary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: 0.5; }
+  button.secondary {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .checkbox-row input { width: 18px; height: 18px; }
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .dropzone.drag { border-color: var(--accent); color: var(--accent); }
+  .file-name { font-size: 14px; color: var(--text); margin-top: 8px; word-break: break-all; }
+  .result {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result.error { border-color: var(--danger); color: var(--danger); }
+  .result.ok { border-color: var(--ok); }
+  .share-key {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    margin: 8px 0;
+  }
+  .status { font-size: 13px; color: var(--muted); margin-top: 8px; min-height: 16px; }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item .meta { font-size: 13px; color: var(--muted); }
+  .list-item .key { font-weight: 700; font-size: 16px; }
+  .list-item button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--accent);
+    font-size: 14px;
+  }
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 560px;
+  }
+  .modal h2 { margin: 0 0 16px; font-size: 17px; }
+  pre.text-view {
+    white-space: pre-wrap;
+    word-break: break-all;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    max-height: 40vh;
+    overflow: auto;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>share <button class="gear" id="openSettings">⚙</button></h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="put">分享</div>
+    <div class="tab" data-tab="get">接收</div>
+    <div class="tab" data-tab="list">列表</div>
+  </div>
+
+  <!-- PUT -->
+  <div class="panel active" id="panel-put">
+    <div class="card">
+      <label>share_key(留空自动生成新的)</label>
+      <input type="text" id="putKey" placeholder="例如 123" inputmode="numeric">
+
+      <div class="dropzone" id="dropzone">
+        点击选择文件 / 拖拽到此处
+        <div class="file-name" id="fileName"></div>
+      </div>
+
+      <label>或直接输入文本</label>
+      <textarea id="putText" placeholder="文本内容..."></textarea>
+
+      <div class="row" style="margin-bottom:12px">
+        <button class="secondary" id="pasteBtn">从剪切板粘贴</button>
+        <button class="secondary" id="clearBtn">清空</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>有效期(秒,留空默认1小时)</label>
+          <input type="number" id="ttl" placeholder="3600">
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="isPrivate">
+        <label style="margin:0" for="isPrivate">不公开(不出现在列表中)</label>
+      </div>
+
+      <button class="primary" id="putBtn">分享</button>
+      <div class="status" id="putStatus"></div>
+      <div class="result" id="putResult">
+        <div class="share-key" id="putResultKey"></div>
+        <button class="secondary" id="copyKeyBtn">复制 share_key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GET -->
+  <div class="panel" id="panel-get">
+    <div class="card">
+      <label>share_key</label>
+      <input type="text" id="getKey" placeholder="例如 123" inputmode="numeric">
+      <button class="primary" id="getBtn">获取</button>
+      <div class="status" id="getStatus"></div>
+      <div class="result" id="getResult"></div>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="panel" id="panel-list">
+    <div class="card">
+      <button class="secondary" id="refreshListBtn">刷新列表</button>
+      <div id="listBody" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <h2>服务器设置</h2>
+    <label>服务器地址</label>
+    <input type="text" id="serverUrl" placeholder="http://127.0.0.1:8080">
+    <label>API Key</label>
+    <input type="text" id="apiKey" placeholder="api_key">
+    <button class="primary" id="saveSettingsBtn">保存</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const LS_SERVER = "share.serverUrl";
+  const LS_KEY = "share.apiKey";
+
+  function getServerUrl() { return localStorage.getItem(LS_SERVER) || window.location.origin; }
+  function getApiKey() { return localStorage.getItem(LS_KEY) || ""; }
+
+  // ---------- tabs ----------
+  document.querySelectorAll(".tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (t) { t.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      tab.classList.add("active");
+      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- settings modal ----------
+  const settingsModal = document.getElementById("settingsModal");
+  function openSettings() {
+    document.getElementById("serverUrl").value = getServerUrl();
+    document.getElementById("apiKey").value = getApiKey();
+    settingsModal.classList.add("show");
+  }
+  document.getElementById("openSettings").addEventListener("click", openSettings);
+  document.getElementById("saveSettingsBtn").addEventListener("click", function () {
+    let url = document.getElementById("serverUrl").value.trim().replace(/\/+$/, "");
+    let key = document.getElementById("apiKey").value.trim();
+    localStorage.setItem(LS_SERVER, url);
+    localStorage.setItem(LS_KEY, key);
+    settingsModal.classList.remove("show");
+  });
+  if (!getApiKey()) {
+    openSettings();
+  }
+
+  // ---------- fetch with retry ----------
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function fetchWithRetry(url, options, onStatus) {
+    const maxRetries = 4;
+    let attempt = 0;
+    while (true) {
+      try {
+        const resp = await fetch(url, options);
+        if (!resp.ok) {
+          if (resp.status >= 400 && resp.status < 500) {
+            const err = new Error("server returned " + resp.status);
+            err.nonRetryable = true;
+            throw err;
+          }
+          throw new Error("server returned " + resp.status);
+        }
+        return resp;
+      } catch (e) {
+        if (e.nonRetryable || attempt >= maxRetries) throw e;
+        attempt++;
+        const backoff = 300 * Math.pow(2, attempt);
+        if (onStatus) onStatus("网络不佳,重试中 (" + attempt + "/" + maxRetries + ")...");
+        await sleep(backoff);
+      }
+    }
+  }
+
+  function apiHeaders(extra) {
+    const h = Object.assign({ "X-API-Key": getApiKey() }, extra || {});
+    return h;
+  }
+
+  // ---------- PUT ----------
+  let selectedFile = null;
+  const dropzone = document.getElementById("dropzone");
+  const fileNameEl = document.getElementById("fileName");
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.style.display = "none";
+  document.body.appendChild(fileInput);
+
+  dropzone.addEventListener("click", function () { fileInput.click(); });
+  fileInput.addEventListener("change", function () {
+    if (fileInput.files && fileInput.files[0]) {
+      selectedFile = fileInput.files[0];
+      fileNameEl.textContent = selectedFile.name + " (" + selectedFile.size + " bytes)";
+    }
+  });
+  ["dragover", "dragenter"].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.add("drag");
+    });
+  });
+  ["dragleave", "drop"].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.remove("drag");
+    });
+  });
+  dropzone.addEventListener("drop", function (e) {
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      selectedFile = e.dataTransfer.files[0];
+      fileNameEl.textContent = selectedFile.name + " (" + selectedFile.size + " bytes)";
+    }
+  });
+
+  document.getElementById("pasteBtn").addEventListener("click", async function () {
+    try {
+      const text = await navigator.clipboard.readText();
+      document.getElementById("putText").value = text;
+    } catch (e) {
+      alert("无法读取剪切板: " + e.message);
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    selectedFile = null;
+    fileInput.value = "";
+    fileNameEl.textContent = "";
+    document.getElementById("putText").value = "";
+  });
+
+  function buildPutUrl() {
+    const key = document.getElementById("putKey").value.trim();
+    const ttl = document.getElementById("ttl").value.trim();
+    const isPrivate = document.getElementById("isPrivate").checked;
+    let url = getServerUrl() + (key ? "/put/" + encodeURIComponent(key) : "/put");
+    const params = [];
+    if (ttl) params.push("ttl_secs=" + encodeURIComponent(ttl));
+    if (isPrivate) params.push("public=false");
+    if (params.length) url += "?" + params.join("&");
+    return url;
+  }
+
+  document.getElementById("putBtn").addEventListener("click", async function () {
+    const statusEl = document.getElementById("putStatus");
+    const resultEl = document.getElementById("putResult");
+    const btn = document.getElementById("putBtn");
+    resultEl.classList.remove("show", "ok", "error");
+    statusEl.textContent = "";
+
+    const text = document.getElementById("putText").value;
+    if (!selectedFile && !text) {
+      alert("请选择文件或输入文本");
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = "上传中...";
+    try {
+      const url = buildPutUrl();
+      let options;
+      if (selectedFile) {
+        const form = new FormData();
+        form.append("file", selectedFile, selectedFile.name);
+        options = { method: "POST", headers: apiHeaders(), body: form };
+      } else {
+        options = {
+          method: "POST",
+          headers: apiHeaders({ "Content-Type": "text/plain" }),
+          body: text,
+        };
+      }
+      const resp = await fetchWithRetry(url, options, function (msg) { statusEl.textContent = msg; });
+      const data = await resp.json();
+      statusEl.textContent = "";
+      resultEl.classList.add("show", "ok");
+      document.getElementById("putResultKey").textContent = data.share_key;
+      window.__lastShareKey = data.share_key;
+    } catch (e) {
+      statusEl.textContent = "";
+      resultEl.classList.add("show", "error");
+      resultEl.textContent = "失败: " + e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById("copyKeyBtn").addEventListener("click", async function () {
+    if (window.__lastShareKey) {
+      try {
+        await navigator.clipboard.writeText(window.__lastShareKey);
+      } catch (e) { /* ignore */ }
+    }
+  });
+
+  // ---------- GET ----------
+  function filenameFromDisposition(disposition) {
+    if (!disposition) return null;
+    const m = /filename="([^"]+)"/.exec(disposition);
+    return m ? m[1] : null;
+  }
+
+  document.getElementById("getBtn").addEventListener("click", async function () {
+    const key = document.getElementById("getKey").value.trim();
+    const statusEl = document.getElementById("getStatus");
+    const resultEl = document.getElementById("getResult");
+    resultEl.classList.remove("show", "ok", "error");
+    resultEl.innerHTML = "";
+    if (!key) { alert("请输入 share_key"); return; }
+
+    statusEl.textContent = "获取中...";
+    try {
+      const url = getServerUrl() + "/get/" + encodeURIComponent(key);
+      const resp = await fetchWithRetry(url, { headers: apiHeaders() }, function (msg) { statusEl.textContent = msg; });
+      const contentType = resp.headers.get("Content-Type") || "";
+      statusEl.textContent = "";
+      resultEl.classList.add("show", "ok");
+
+      if (contentType.indexOf("text/plain") === 0) {
+        const text = await resp.text();
+        const pre = document.createElement("pre");
+        pre.className = "text-view";
+        pre.textContent = text;
+        resultEl.appendChild(pre);
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "secondary";
+        copyBtn.style.marginTop = "8px";
+        copyBtn.textContent = "复制文本";
+        copyBtn.addEventListener("click", function () { navigator.clipboard.writeText(text).catch(function(){}); });
+        resultEl.appendChild(copyBtn);
+      } else {
+        const disposition = resp.headers.get("Content-Disposition");
+        const filename = filenameFromDisposition(disposition) || key;
+        const blob = await resp.blob();
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = dlUrl;
+        a.download = filename;
+        a.textContent = "下载 " + filename;
+        a.className = "secondary";
+        a.style.display = "block";
+        a.style.textAlign = "center";
+        a.style.padding = "12px";
+        a.style.textDecoration = "none";
+        a.style.color = "var(--text)";
+        resultEl.appendChild(a);
+        a.click();
+      }
+    } catch (e) {
+      statusEl.textContent = "";
+      resultEl.classList.add("show", "error");
+      resultEl.textContent = "失败: " + e.message;
+    }
+  });
+
+  // ---------- LIST ----------
+  async function loadList() {
+    const body = document.getElementById("listBody");
+    body.textContent = "加载中...";
+    try {
+      const url = getServerUrl() + "/list";
+      const resp = await fetchWithRetry(url, { headers: apiHeaders() });
+      const items = await resp.json();
+      body.innerHTML = "";
+      if (!items.length) {
+        body.textContent = "(暂无公开分享)";
+        return;
+      }
+      items.forEach(function (item) {
+        const row = document.createElement("div");
+        row.className = "list-item";
+        const left = document.createElement("div");
+        const keyEl = document.createElement("div");
+        keyEl.className = "key";
+        keyEl.textContent = item.share_key;
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = item.kind + (item.raw_file_name ? " · " + item.raw_file_name : "");
+        left.appendChild(keyEl);
+        left.appendChild(meta);
+        const btnGroup = document.createElement("div");
+        btnGroup.style.display = "flex";
+        btnGroup.style.gap = "8px";
+
+        const btn = document.createElement("button");
+        btn.textContent = "获取";
+        btn.addEventListener("click", function () {
+          document.querySelector('.tab[data-tab="get"]').click();
+          document.getElementById("getKey").value = item.share_key;
+          document.getElementById("getBtn").click();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "删除";
+        delBtn.style.color = "var(--danger)";
+        delBtn.addEventListener("click", async function () {
+          if (!confirm("确认删除 share_key " + item.share_key + " ?")) return;
+          delBtn.disabled = true;
+          try {
+            await fetchWithRetry(
+              getServerUrl() + "/delete/" + encodeURIComponent(item.share_key),
+              { method: "DELETE", headers: apiHeaders() }
+            );
+            loadList();
+          } catch (e) {
+            alert("删除失败: " + e.message);
+            delBtn.disabled = false;
+          }
+        });
+
+        btnGroup.appendChild(btn);
+        btnGroup.appendChild(delBtn);
+        row.appendChild(left);
+        row.appendChild(btnGroup);
+        body.appendChild(row);
+      });
+    } catch (e) {
+      body.textContent = "加载失败: " + e.message;
+    }
+  }
+  document.getElementById("refreshListBtn").addEventListener("click", loadList);
+  document.querySelector('.tab[data-tab="list"]').addEventListener("click", loadList);
+})();
+</script>
+</body>
+</html>
