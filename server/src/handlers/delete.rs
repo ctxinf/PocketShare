@@ -8,7 +8,9 @@ pub async fn delete_share(
 ) -> Result<StatusCode, AppError> {
     let deleted = {
         let conn = state.db.lock().await;
-        db::delete_share(&conn, &share_key)?
+        let deleted = db::delete_share(&conn, &share_key)?;
+        db::delete_tokens_for_share(&conn, &share_key)?;
+        deleted
     };
     if !deleted {
         return Err(AppError::NotFound);

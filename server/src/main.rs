@@ -54,12 +54,14 @@ async fn main() -> anyhow::Result<()> {
         .route("/get/:share_key", get(handlers::get::get_share))
         .route("/list", get(handlers::list::list_shares))
         .route("/delete/:share_key", delete(handlers::delete::delete_share))
+        .route("/link/:share_key", post(handlers::link::create_link))
         .layer(DefaultBodyLimit::max(max_body))
         .route_layer(middleware::from_fn_with_state(state.clone(), handlers::auth::require_api_key));
 
     let app = Router::new()
         .route("/health", get(|| async { "ok" }))
         .route("/", get(|| async { Html(INDEX_HTML) }))
+        .route("/dl/:share_key", get(handlers::download::download))
         .merge(protected)
         .with_state(state.clone());
 

@@ -19,7 +19,13 @@ pub fn open(db_path: &Path) -> rusqlite::Result<Connection> {
             is_public INTEGER NOT NULL DEFAULT 1,
             created_at INTEGER NOT NULL,
             expires_at INTEGER NOT NULL
-        );",
+        );
+        CREATE TABLE IF NOT EXISTS download_tokens (
+            token TEXT PRIMARY KEY,
+            share_key TEXT NOT NULL,
+            expires_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS download_tokens_share_key_idx ON download_tokens(share_key);",
     )?;
     Ok(conn)
 }
@@ -114,4 +120,56 @@ pub fn expired_keys(conn: &Connection, now: i64) -> rusqlite::Result<Vec<String>
 
 pub fn delete_expired(conn: &Connection, now: i64) -> rusqlite::Result<usize> {
     conn.execute("DELETE FROM shares WHERE expires_at < ?1", params![now])
+}
+
+pub struct DownloadToken {
+    pub share_key: String,
+}
+
+pub fn create_download_token(
+    conn: &Connection,
+    token: &str,
+    share_key: &str,
+    expires_at: i64,
+) -> rusqlite::Result<()> {
+    conn.execute(
+        "INSERT INTO download_tokens (token, share_key, expires_at) VALUES (?1, ?2, ?3)",
+        params![token, share_key, expires_at],
+    )?;
+    Ok(())
+}
+
+pub fn get_download_token(conn: &Connection, token: &str, now: i64) -> rusqlite::Result<Option<DownloadToken>> {
+    conn.query_row(
+        "SELECT share_key FROM download_tokens WHERE token = ?1 AND expires_at >= ?2",
+        params![token, now],
+        |r| Ok(DownloadToken { share_key: r.get(0)? }),
+    )
+    .optional()
+}
+
+pub fn renew_download_token(conn: &Connection, token: &str, new_expires_at: i64) -> rusqlite::Result<()> {
+    conn.execute(
+        "UPDATE download_tokens SET expires_at = ?2 WHERE token = ?1",
+        params![token, new_expires_at],
+    )?;
+    Ok(())
+}
+
+/// Extends a share's expiry to `at_least`, but never shortens it.
+pub fn extend_share_expiry(conn: &Connection, share_key: &str, at_least: i64) -> rusqlite::Result<()> {
+    conn.execute(
+        "UPDATE shares SET expires_at = MAX(expires_at, ?2) WHERE share_key = ?1",
+        params![share_key, at_least],
+    )?;
+    Ok(())
+}
+
+pub fn delete_tokens_for_share(conn: &Connection, share_key: &str) -> rusqlite::Result<()> {
+    conn.execute("DELETE FROM download_tokens WHERE share_key = ?1", params![share_key])?;
+    Ok(())
+}
+
+pub fn delete_expired_tokens(conn: &Connection, now: i64) -> rusqlite::Result<usize> {
+    conn.execute("DELETE FROM download_tokens WHERE expires_at < ?1", params![now])
 }

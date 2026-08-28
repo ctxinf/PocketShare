@@ -7,12 +7,21 @@ pub enum AppError {
     NotFound,
     PayloadTooLarge,
     CapacityFull,
+    RangeNotSatisfiable(u64),
     BadRequest(String),
     Internal(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        if let AppError::RangeNotSatisfiable(total_len) = self {
+            return (
+                StatusCode::RANGE_NOT_SATISFIABLE,
+                [(axum::http::header::CONTENT_RANGE, format!("bytes */{total_len}"))],
+                "range not satisfiable",
+            )
+                .into_response();
+        }
         let (status, msg) = match self {
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized".to_string()),
             AppError::NotFound => (StatusCode::NOT_FOUND, "not found".to_string()),
@@ -22,6 +31,7 @@ impl IntoResponse for AppError {
             AppError::CapacityFull => {
                 (StatusCode::SERVICE_UNAVAILABLE, "share key capacity full".to_string())
             }
+            AppError::RangeNotSatisfiable(_) => unreachable!(),
             AppError::BadRequest(m) => (StatusCode::BAD_REQUEST, m),
             AppError::Internal(m) => (StatusCode::INTERNAL_SERVER_ERROR, m),
         };

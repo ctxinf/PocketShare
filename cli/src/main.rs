@@ -20,6 +20,7 @@ fn usage() -> ! {
   share login <api_key> [--server <url>]
   share put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
   share get <share_key> [<out_path>]
+  share get <share_key> --link
   share delete <share_key>
   share list
 
@@ -37,6 +38,7 @@ usage:
   share login <api_key> [--server <url>]   save server url + api_key
   share put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
   share get <share_key> [<out_path>]
+  share get <share_key> --link              mint a temporary token download link (no api_key needed to use it)
   share delete <share_key>
   share list
   share help | -h | --help
@@ -149,10 +151,22 @@ async fn cmd_put(mut args: Vec<String>) -> Result<()> {
 
 async fn cmd_get(mut args: Vec<String>) -> Result<()> {
     let cfg = Config::load()?;
+    let want_link = take_flag(&mut args, "--link");
     if args.is_empty() || args.len() > 2 {
         usage();
     }
     let key = args.remove(0);
+
+    if want_link {
+        if !args.is_empty() {
+            usage();
+        }
+        let link = client::create_link(&cfg, &key).await?;
+        println!("{}/dl/{}?token={}", cfg.server_url, key, link.token);
+        println!("expires_at={} (auto-renews on access)", link.expires_at);
+        return Ok(());
+    }
+
     let out_arg = if args.is_empty() { None } else { Some(args.remove(0)) };
 
     match client::get(&cfg, &key).await? {

@@ -23,6 +23,12 @@ pub enum GetResult {
     File { file_name: String, bytes: Vec<u8> },
 }
 
+#[derive(Deserialize)]
+pub struct LinkResponse {
+    pub token: String,
+    pub expires_at: i64,
+}
+
 fn client() -> reqwest::Client {
     reqwest::Client::new()
 }
@@ -148,6 +154,21 @@ pub async fn list(cfg: &Config) -> Result<Vec<ListItem>> {
             .context("network error")?;
         check_status(&resp)?;
         Ok(resp.json::<Vec<ListItem>>().await.context("bad response body")?)
+    })
+    .await
+}
+
+pub async fn create_link(cfg: &Config, key: &str) -> Result<LinkResponse> {
+    let url = format!("{}/link/{}", cfg.server_url, key);
+    with_retry(|| async {
+        let resp = client()
+            .post(&url)
+            .header("X-API-Key", &cfg.api_key)
+            .send()
+            .await
+            .context("network error")?;
+        check_status(&resp)?;
+        Ok(resp.json::<LinkResponse>().await.context("bad response body")?)
     })
     .await
 }

@@ -25,9 +25,16 @@ async fn run_once(state: &AppState) -> anyhow::Result<()> {
         crate::storage::delete_asset(&assets_dir, key).await?;
     }
     let conn = state.db.lock().await;
+    for key in &keys {
+        crate::db::delete_tokens_for_share(&conn, key)?;
+    }
     let deleted = crate::db::delete_expired(&conn, now)?;
     if deleted > 0 {
         tracing::info!("cleanup: removed {} expired share(s)", deleted);
+    }
+    let deleted_tokens = crate::db::delete_expired_tokens(&conn, now)?;
+    if deleted_tokens > 0 {
+        tracing::info!("cleanup: removed {} expired download token(s)", deleted_tokens);
     }
     Ok(())
 }

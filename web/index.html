@@ -2,289 +2,1212 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>share</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08090a" id="metaThemeColor">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230a84ff'/%3E%3Cstop offset='100%25' stop-color='%230055d6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M35 40 L50 25 L65 40'/%3E%3Cline x1='50' y1='25' x2='50' y2='62'/%3E%3Cpath d='M28 54 v14 a6 6 0 0 0 6 6 h32 a6 6 0 0 0 6 -6 V54'/%3E%3C/g%3E%3C/svg%3E">
+<title>🔗 Share</title>
 <style>
   :root {
-    --bg: #0f1115;
-    --card: #171a21;
-    --border: #2a2f3a;
-    --text: #e6e8eb;
-    --muted: #8a90a0;
-    --accent: #4f8cff;
+    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 9999px;
+    --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Dark Theme (Default & System Dark) */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --bg-gradient: radial-gradient(100% 80% at 50% -10%, rgba(30, 45, 75, 0.45) 0%, rgba(0, 0, 0, 0) 100%), #050608;
+      --surface-nav: rgba(22, 24, 30, 0.75);
+      --surface-card: rgba(24, 27, 34, 0.65);
+      --surface-card-hover: rgba(30, 34, 44, 0.8);
+      --surface-subtle: rgba(255, 255, 255, 0.06);
+      --surface-subtle-hover: rgba(255, 255, 255, 0.1);
+      --surface-input: rgba(12, 14, 18, 0.8);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --border-focus: rgba(10, 132, 255, 0.6);
+      --text: #f5f5f7;
+      --text-secondary: #98989f;
+      --text-tertiary: #636366;
+      --accent: #0a84ff;
+      --accent-gradient: linear-gradient(135deg, #0a84ff 0%, #0066d6 100%);
+      --accent-hover: #0071e3;
+      --accent-subtle: rgba(10, 132, 255, 0.15);
+      --accent-text: #ffffff;
+      --danger: #ff453a;
+      --danger-subtle: rgba(255, 69, 58, 0.15);
+      --ok: #30d158;
+      --ok-subtle: rgba(48, 209, 88, 0.15);
+      --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+      --shadow-pop: 0 20px 48px -4px rgba(0, 0, 0, 0.7);
+      --blur: blur(28px) saturate(190%);
+      --dropzone-bg: rgba(255, 255, 255, 0.02);
+      --dropzone-bg-drag: rgba(10, 132, 255, 0.08);
+    }
+  }
+
+  /* Explicit Dark */
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --bg-gradient: radial-gradient(100% 80% at 50% -10%, rgba(30, 45, 75, 0.45) 0%, rgba(0, 0, 0, 0) 100%), #050608;
+    --surface-nav: rgba(22, 24, 30, 0.75);
+    --surface-card: rgba(24, 27, 34, 0.65);
+    --surface-card-hover: rgba(30, 34, 44, 0.8);
+    --surface-subtle: rgba(255, 255, 255, 0.06);
+    --surface-subtle-hover: rgba(255, 255, 255, 0.1);
+    --surface-input: rgba(12, 14, 18, 0.8);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-focus: rgba(10, 132, 255, 0.6);
+    --text: #f5f5f7;
+    --text-secondary: #98989f;
+    --text-tertiary: #636366;
+    --accent: #0a84ff;
+    --accent-gradient: linear-gradient(135deg, #0a84ff 0%, #0066d6 100%);
+    --accent-hover: #0071e3;
+    --accent-subtle: rgba(10, 132, 255, 0.15);
     --accent-text: #ffffff;
-    --danger: #ff5c5c;
-    --ok: #3ecf8e;
-    --radius: 14px;
+    --danger: #ff453a;
+    --danger-subtle: rgba(255, 69, 58, 0.15);
+    --ok: #30d158;
+    --ok-subtle: rgba(48, 209, 88, 0.15);
+    --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+    --shadow-pop: 0 20px 48px -4px rgba(0, 0, 0, 0.7);
+    --blur: blur(28px) saturate(190%);
+    --dropzone-bg: rgba(255, 255, 255, 0.02);
+    --dropzone-bg-drag: rgba(10, 132, 255, 0.08);
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
+
+  /* Light Theme (Default & System Light) */
+  :root,
+  :root[data-theme="light"] {
+    --bg: #f4f5f8;
+    --bg-gradient: radial-gradient(100% 70% at 50% -10%, rgba(205, 225, 255, 0.6) 0%, rgba(244, 245, 248, 0) 100%), #f4f5f8;
+    --surface-nav: rgba(255, 255, 255, 0.82);
+    --surface-card: rgba(255, 255, 255, 0.88);
+    --surface-card-hover: rgba(255, 255, 255, 0.96);
+    --surface-subtle: rgba(0, 0, 0, 0.04);
+    --surface-subtle-hover: rgba(0, 0, 0, 0.07);
+    --surface-input: rgba(248, 249, 251, 0.95);
+    --border: rgba(0, 0, 0, 0.08);
+    --border-subtle: rgba(0, 0, 0, 0.04);
+    --border-focus: rgba(0, 113, 227, 0.5);
+    --text: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #98989d;
+    --accent: #0071e3;
+    --accent-gradient: linear-gradient(135deg, #0077ed 0%, #005bb5 100%);
+    --accent-hover: #0077ed;
+    --accent-subtle: rgba(0, 113, 227, 0.1);
+    --accent-text: #ffffff;
+    --danger: #ff3b30;
+    --danger-subtle: rgba(255, 59, 48, 0.1);
+    --ok: #34c759;
+    --ok-subtle: rgba(52, 199, 89, 0.12);
+    --shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 8px 24px 0 rgba(0, 0, 0, 0.04);
+    --shadow-pop: 0 20px 48px -4px rgba(0, 0, 0, 0.12);
+    --blur: blur(28px) saturate(190%);
+    --dropzone-bg: rgba(0, 0, 0, 0.015);
+    --dropzone-bg-drag: rgba(0, 113, 227, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
     margin: 0;
-    background: var(--bg);
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    font-family: var(--font-stack);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(36px + env(safe-area-inset-bottom));
+    transition: background 0.3s ease, color 0.3s ease;
   }
+
   .wrap {
-    max-width: 560px;
+    max-width: 520px;
     margin: 0 auto;
-    padding: 16px 16px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
-  h1 {
-    font-size: 20px;
-    margin: 8px 0 16px;
+
+  /* ---------- Unified Top Header Row ---------- */
+  .top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--surface-nav);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    padding: 6px 8px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .tabs-segment {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 8px 0;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .tab-btn:hover {
+    color: var(--text);
+    background: var(--surface-subtle);
+  }
+
+  .tab-btn.active {
+    color: var(--text);
+    font-weight: 600;
+    background: var(--surface-subtle-hover);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  :root[data-theme="light"] .tab-btn.active {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .tab-btn.active {
+      background: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 4px;
+    border-left: 1px solid var(--border-subtle);
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .icon-btn:hover {
+    color: var(--text);
+    background: var(--surface-subtle);
+    transform: scale(1.05);
+  }
+
+  .icon-btn:active {
+    transform: scale(0.95);
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---------- Notification / Alert Banner at TOP ---------- */
+  .top-notification {
+    display: none;
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    animation: slideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition);
+  }
+
+  .top-notification.show {
+    display: block;
+  }
+
+  .top-notification.ok {
+    background: var(--ok-subtle);
+    border: 1px solid var(--ok);
+    color: var(--text);
+  }
+
+  .top-notification.error {
+    background: var(--danger-subtle);
+    border: 1px solid var(--danger);
+    color: var(--text);
+  }
+
+  .top-notification.info {
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent);
+    color: var(--text);
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .notification-header.ok { color: var(--ok); }
+  .notification-header.error { color: var(--danger); }
+  .notification-header.info { color: var(--accent); }
+
+  .notification-body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  .key-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0 6px;
+  }
+
+  .key-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    color: var(--text);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .key-action-bar {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* ---------- Cards & Panels ---------- */
+  .panel {
+    display: none;
+    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .panel.active {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--surface-card);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- Sub-Segmented Control (Text vs File) ---------- */
+  .sub-segment {
+    display: flex;
+    background: var(--surface-subtle);
+    padding: 4px;
+    border-radius: var(--radius-lg);
+    gap: 4px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .sub-seg-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .sub-seg-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sub-seg-btn:hover {
+    color: var(--text);
+  }
+
+  .sub-seg-btn.active {
+    color: var(--text);
+    font-weight: 600;
+    background: var(--surface-card-hover);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  :root[data-theme="light"] .sub-seg-btn.active {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .sub-seg-btn.active {
+      background: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  .sub-panel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sub-panel.active {
+    display: flex;
+  }
+
+  /* ---------- Forms & Inputs ---------- */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label, .field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .label-hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  input[type=text],
+  input[type=number],
+  textarea {
+    width: 100%;
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-md);
+    padding: 13px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+  }
+
+  input[type=text]:focus,
+  input[type=number]:focus,
+  textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  textarea {
+    min-height: 128px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-row > * {
+    flex: 1;
+  }
+
+  /* Buttons */
+  button {
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent-gradient);
+    color: var(--accent-text);
+    font-size: 15.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    box-shadow: 0 4px 14px rgba(10, 132, 255, 0.25);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 6px 20px rgba(10, 132, 255, 0.35);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.985);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: var(--transition);
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface-subtle-hover);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .btn-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .btn-icon-subtle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .btn-icon-subtle:hover {
+    color: var(--text);
+    background: var(--surface-subtle-hover);
+  }
+
+  .btn-icon-subtle svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  /* ---------- Dropzone / File Picker ---------- */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--dropzone-bg);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    user-select: none;
+  }
+
+  .dropzone:hover {
+    border-color: var(--accent);
+    background: var(--dropzone-bg-drag);
+  }
+
+  .dropzone.drag {
+    border-color: var(--accent);
+    background: var(--dropzone-bg-drag);
+    transform: scale(1.01);
+  }
+
+  .dropzone-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+  }
+
+  .dropzone-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .dropzone-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .dropzone-desc {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  .file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    gap: 12px;
+  }
+
+  .file-preview-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .file-preview-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .file-preview-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .file-preview-meta {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-size {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* ---------- Apple-style Switch & Checkbox ---------- */
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .switch-row-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .switch-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .switch-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .apple-switch {
+    position: relative;
+    width: 44px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .apple-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .apple-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--surface-subtle-hover);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    border-radius: 34px;
+  }
+
+  .apple-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    transition: var(--transition);
+    border-radius: 50%;
+  }
+
+  .apple-switch input:checked + .apple-slider {
+    background-color: var(--ok);
+    border-color: var(--ok);
+  }
+
+  .apple-switch input:checked + .apple-slider:before {
+    transform: translateX(18px);
+  }
+
+  /* ---------- Accordion / More Options ---------- */
+  .options-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  .options-toggle:hover {
+    color: var(--text);
+  }
+
+  .options-toggle svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: transform 0.2s ease;
+  }
+
+  .options-toggle.open svg {
+    transform: rotate(180deg);
+  }
+
+  .options-content {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 4px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .options-content.show {
+    display: flex;
+  }
+
+  /* ---------- GET Result Area ---------- */
+  pre.text-view {
+    white-space: pre-wrap;
+    word-break: break-all;
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-height: 48vh;
+    overflow-y: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    color: var(--text);
+  }
+
+  .get-result-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+    animation: fadeIn 0.25s ease;
+  }
+
+  /* ---------- LIST Items ---------- */
+  .list-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .gear {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 20px;
-    padding: 8px;
-    cursor: pointer;
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .tab {
-    flex: 1;
-    padding: 12px 0;
-    text-align: center;
-    border-radius: var(--radius);
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--muted);
+
+  .list-title {
     font-size: 15px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .tab.active {
-    color: var(--accent-text);
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  label {
-    display: block;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  input[type=text], input[type=number], textarea {
-    width: 100%;
-    background: #0f1115;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 16px;
-    margin-bottom: 12px;
-  }
-  textarea { min-height: 100px; resize: vertical; font-family: inherit; }
-  .row { display: flex; gap: 10px; }
-  .row > * { flex: 1; }
-  button.primary {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    background: var(--accent);
-    color: var(--accent-text);
-    font-size: 16px;
     font-weight: 600;
-    cursor: pointer;
-  }
-  button.primary:disabled { opacity: 0.5; }
-  button.secondary {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: transparent;
     color: var(--text);
-    font-size: 15px;
-    cursor: pointer;
   }
-  .checkbox-row {
+
+  .list-body {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
-    margin-bottom: 12px;
-    color: var(--muted);
-    font-size: 14px;
   }
-  .checkbox-row input { width: 18px; height: 18px; }
-  .dropzone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 28px 16px;
-    text-align: center;
-    color: var(--muted);
-    margin-bottom: 12px;
-    cursor: pointer;
-  }
-  .dropzone.drag { border-color: var(--accent); color: var(--accent); }
-  .file-name { font-size: 14px; color: var(--text); margin-top: 8px; word-break: break-all; }
-  .result {
-    margin-top: 12px;
-    padding: 14px;
-    border-radius: 10px;
-    background: #0f1115;
-    border: 1px solid var(--border);
-    font-size: 14px;
-    display: none;
-  }
-  .result.show { display: block; }
-  .result.error { border-color: var(--danger); color: var(--danger); }
-  .result.ok { border-color: var(--ok); }
-  .share-key {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-align: center;
-    margin: 8px 0;
-  }
-  .status { font-size: 13px; color: var(--muted); margin-top: 8px; min-height: 16px; }
+
   .list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+    gap: 12px;
   }
-  .list-item:last-child { border-bottom: none; }
-  .list-item .meta { font-size: 13px; color: var(--muted); }
-  .list-item .key { font-weight: 700; font-size: 16px; }
-  .list-item button {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--accent);
+
+  .list-item:hover {
+    background: var(--surface-subtle-hover);
+    border-color: var(--border);
+  }
+
+  .list-item-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .list-item-key {
+    font-weight: 700;
+    font-size: 16px;
+    font-family: ui-monospace, "SF Mono", monospace;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  .list-item-meta {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-tertiary);
     font-size: 14px;
   }
+
+  /* ---------- Modal Dialog ---------- */
   .modal-backdrop {
     display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    align-items: flex-end;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    align-items: center;
     justify-content: center;
-    z-index: 10;
+    padding: 16px;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
   }
-  .modal-backdrop.show { display: flex; }
-  .modal {
-    background: var(--card);
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
-    width: 100%;
-    max-width: 560px;
+
+  .modal-backdrop.show {
+    display: flex;
   }
-  .modal h2 { margin: 0 0 16px; font-size: 17px; }
-  pre.text-view {
-    white-space: pre-wrap;
-    word-break: break-all;
-    background: #0f1115;
+
+  .modal-card {
+    background: var(--surface-card);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow-pop);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes scaleUp {
+    from { transform: scale(0.94); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Toast Notification Floating */
+  .toast {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-card);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-pop);
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
     font-size: 14px;
-    max-height: 40vh;
-    overflow: auto;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>share <button class="gear" id="openSettings">⚙</button></h1>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="put">分享</div>
-    <div class="tab" data-tab="get">接收</div>
-    <div class="tab" data-tab="list">列表</div>
+<div class="wrap">
+  <!-- Top Header Row (Tabs + Theme Toggle + Settings) -->
+  <header class="top-header">
+    <nav class="tabs-segment" role="tablist">
+      <button class="tab-btn active" data-tab="put" role="tab" id="tabPut">分享</button>
+      <button class="tab-btn" data-tab="get" role="tab" id="tabGet">接收</button>
+      <button class="tab-btn" data-tab="list" role="tab" id="tabList">列表</button>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeBtn" title="切换外观主题 (自动/亮色/暗色)" aria-label="切换外观主题">
+        <!-- SVG will be updated via JS -->
+      </button>
+      <button class="icon-btn" id="openSettings" title="服务器设置" aria-label="服务器设置">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Global Top Notification Banner (最上方通知区域) -->
+  <div class="top-notification" id="topNotification">
+    <div class="notification-header" id="notifHeader"></div>
+    <div class="notification-body" id="notifBody"></div>
   </div>
 
-  <!-- PUT -->
-  <div class="panel active" id="panel-put">
+  <!-- PANEL: PUT (分享) -->
+  <main class="panel active" id="panel-put">
     <div class="card">
-      <label>share_key(留空自动生成新的)</label>
-      <input type="text" id="putKey" placeholder="例如 123" inputmode="numeric">
-
-      <div class="dropzone" id="dropzone">
-        点击选择文件 / 拖拽到此处
-        <div class="file-name" id="fileName"></div>
+      <!-- Mutually Exclusive Sub Tabs: Text vs File -->
+      <div class="sub-segment" role="tablist">
+        <button class="sub-seg-btn active" id="btnTypeTxt" data-put-type="text" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          文本分享
+        </button>
+        <button class="sub-seg-btn" id="btnTypeFile" data-put-type="file" role="tab">
+          <svg viewBox="0 0 24 24"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2A8 8 0 0 0 4.1 13 4 4 0 0 0 5 20h14a4 4 0 0 0 2.2-.6"></path><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+          文件分享
+        </button>
       </div>
 
-      <label>或直接输入文本</label>
-      <textarea id="putText" placeholder="文本内容..."></textarea>
-
-      <div class="row" style="margin-bottom:12px">
-        <button class="secondary" id="pasteBtn">从剪切板粘贴</button>
-        <button class="secondary" id="clearBtn">清空</button>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>有效期(秒,留空默认1小时)</label>
-          <input type="number" id="ttl" placeholder="3600">
+      <!-- Text Sub-panel -->
+      <div class="sub-panel active" id="putSub-text">
+        <div class="form-group">
+          <label class="field-label" for="putText">文本内容</label>
+          <textarea id="putText" placeholder="在此输入或粘贴需要分享的文本内容..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary btn-sm" id="pasteBtn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            从剪贴板粘贴
+          </button>
+          <button class="btn-secondary btn-sm" id="clearTextBtn" type="button">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            清空
+          </button>
         </div>
       </div>
-      <div class="checkbox-row">
-        <input type="checkbox" id="isPrivate">
-        <label style="margin:0" for="isPrivate">不公开(不出现在列表中)</label>
+
+      <!-- File Sub-panel -->
+      <div class="sub-panel" id="putSub-file">
+        <div class="form-group">
+          <label class="field-label">选择或拖入文件</label>
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </div>
+            <div class="dropzone-title">点击选择文件 或 拖拽文件到此处</div>
+            <div class="dropzone-desc">支持任意格式文件上传</div>
+          </div>
+
+          <div class="file-preview" id="filePreview" style="display:none;">
+            <div class="file-preview-left">
+              <div class="file-preview-icon">
+                <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+              </div>
+              <div class="file-preview-meta">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+              </div>
+            </div>
+            <button class="btn-icon-subtle" id="removeFileBtn" title="移除选中的文件">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <button class="primary" id="putBtn">分享</button>
-      <div class="status" id="putStatus"></div>
-      <div class="result" id="putResult">
-        <div class="share-key" id="putResultKey"></div>
-        <button class="secondary" id="copyKeyBtn">复制 share_key</button>
+      <!-- Options (Accordion) -->
+      <button class="options-toggle" id="optionsToggle" type="button">
+        <span>高级选项 (自定义 key / 有效期 / 隐私)</span>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+
+      <div class="options-content" id="optionsContent">
+        <div class="form-group">
+          <label class="field-label" for="putKey">
+            <span>自定义 Share Key</span>
+            <span class="label-hint">留空自动生成</span>
+          </label>
+          <input type="text" id="putKey" placeholder="例如: 123 或 my-doc" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="ttl">
+            <span>有效期 (秒)</span>
+            <span class="label-hint">默认 3600 秒 (1小时)</span>
+          </label>
+          <input type="number" id="ttl" placeholder="3600" min="1">
+        </div>
+
+        <label class="switch-row" for="isPrivate">
+          <div class="switch-row-left">
+            <span class="switch-title">不公开分享</span>
+            <span class="switch-desc">开启后不会出现在公共列表中</span>
+          </div>
+          <div class="apple-switch">
+            <input type="checkbox" id="isPrivate">
+            <span class="apple-slider"></span>
+          </div>
+        </label>
       </div>
-    </div>
-  </div>
 
-  <!-- GET -->
-  <div class="panel" id="panel-get">
-    <div class="card">
-      <label>share_key</label>
-      <input type="text" id="getKey" placeholder="例如 123" inputmode="numeric">
-      <button class="primary" id="getBtn">获取</button>
-      <div class="status" id="getStatus"></div>
-      <div class="result" id="getResult"></div>
+      <!-- Submit Action -->
+      <button class="btn-primary" id="putBtn" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        <span id="putBtnText">立即分享</span>
+      </button>
     </div>
-  </div>
+  </main>
 
-  <!-- LIST -->
-  <div class="panel" id="panel-list">
+  <!-- PANEL: GET (接收) -->
+  <main class="panel" id="panel-get">
     <div class="card">
-      <button class="secondary" id="refreshListBtn">刷新列表</button>
-      <div id="listBody" style="margin-top:8px"></div>
+      <div class="form-group">
+        <label class="field-label" for="getKey">Share Key</label>
+        <input type="text" id="getKey" placeholder="输入 share_key (例如 123)" autocomplete="off">
+      </div>
+      <button class="btn-primary" id="getBtn" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>获取内容</span>
+      </button>
+
+      <div id="getContentResult" class="get-result-card" style="display:none;"></div>
     </div>
-  </div>
+  </main>
+
+  <!-- PANEL: LIST (列表) -->
+  <main class="panel" id="panel-list">
+    <div class="card">
+      <div class="list-header">
+        <span class="list-title">公开分享列表</span>
+        <button class="btn-secondary btn-sm" id="refreshListBtn" type="button">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          刷新
+        </button>
+      </div>
+      <div id="listBody" class="list-body"></div>
+    </div>
+  </main>
 </div>
 
+<!-- Settings Modal -->
 <div class="modal-backdrop" id="settingsModal">
-  <div class="modal">
-    <h2>服务器设置</h2>
-    <label>服务器地址</label>
-    <input type="text" id="serverUrl" placeholder="http://127.0.0.1:8080">
-    <label>API Key</label>
-    <input type="text" id="apiKey" placeholder="api_key">
-    <button class="primary" id="saveSettingsBtn">保存</button>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>服务器设置</h3>
+      <button class="btn-icon-subtle" id="closeSettingsBtn" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="field-label" for="serverUrl">服务器地址</label>
+        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:8080">
+      </div>
+      <div class="form-group">
+        <label class="field-label" for="apiKey">API Key</label>
+        <input type="text" id="apiKey" placeholder="输入访问密钥 (api_key)">
+      </div>
+      <button class="btn-primary" id="saveSettingsBtn" type="button">保存设置</button>
+    </div>
   </div>
 </div>
+
+<!-- Floating Toast Feedback -->
+<div class="toast" id="toast"></div>
 
 <script>
 (function () {
@@ -292,40 +1215,147 @@
 
   const LS_SERVER = "share.serverUrl";
   const LS_KEY = "share.apiKey";
+  const LS_THEME = "share.theme";
 
   function getServerUrl() { return localStorage.getItem(LS_SERVER) || window.location.origin; }
   function getApiKey() { return localStorage.getItem(LS_KEY) || ""; }
 
-  // ---------- tabs ----------
-  document.querySelectorAll(".tab").forEach(function (tab) {
+  // ---------- Theme Switcher (Apple 2026 Adaptive & Manual) ----------
+  // Modes: 'auto' | 'light' | 'dark'
+  let currentTheme = localStorage.getItem(LS_THEME) || "auto";
+  const themeBtn = document.getElementById("themeBtn");
+  const metaThemeColor = document.getElementById("metaThemeColor");
+
+  const ICONS = {
+    sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+    moon: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+    auto: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18c4.97 0 9-4.03 9-9s-4.03-9-9-9z" fill="currentColor"></path></svg>'
+  };
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem(LS_THEME, theme);
+
+    if (theme === "auto") {
+      document.documentElement.removeAttribute("data-theme");
+      themeBtn.innerHTML = ICONS.auto;
+      themeBtn.title = "外观: 跟随系统 (点击切换为亮色)";
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      metaThemeColor.setAttribute("content", isDark ? "#000000" : "#f4f5f8");
+    } else if (theme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      themeBtn.innerHTML = ICONS.sun;
+      themeBtn.title = "外观: 亮色模式 (点击切换为暗色)";
+      metaThemeColor.setAttribute("content", "#f4f5f8");
+    } else {
+      document.documentElement.setAttribute("data-theme", "dark");
+      themeBtn.innerHTML = ICONS.moon;
+      themeBtn.title = "外观: 暗色模式 (点击切换为跟随系统)";
+      metaThemeColor.setAttribute("content", "#000000");
+    }
+  }
+
+  themeBtn.addEventListener("click", function () {
+    if (currentTheme === "auto") {
+      applyTheme("light");
+      showToast("已切换至亮色模式");
+    } else if (currentTheme === "light") {
+      applyTheme("dark");
+      showToast("已切换至暗色模式");
+    } else {
+      applyTheme("auto");
+      showToast("已设为跟随系统");
+    }
+  });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+    if (currentTheme === "auto") {
+      applyTheme("auto");
+    }
+  });
+
+  applyTheme(currentTheme);
+
+  // ---------- Toast Notification ----------
+  let toastTimer = null;
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove("show");
+    }, 2200);
+  }
+
+  // ---------- Top Notification Banner ----------
+  const topNotification = document.getElementById("topNotification");
+  const notifHeader = document.getElementById("notifHeader");
+  const notifBody = document.getElementById("notifBody");
+
+  function showTopNotification(type, title, htmlContent) {
+    topNotification.className = "top-notification show " + type;
+    notifHeader.className = "notification-header " + type;
+    notifHeader.textContent = title;
+    notifBody.innerHTML = htmlContent;
+    topNotification.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function hideTopNotification() {
+    topNotification.className = "top-notification";
+    notifBody.innerHTML = "";
+    notifHeader.textContent = "";
+  }
+
+  // ---------- Main Tabs Switching ----------
+  document.querySelectorAll(".tab-btn").forEach(function (tab) {
     tab.addEventListener("click", function () {
-      document.querySelectorAll(".tab").forEach(function (t) { t.classList.remove("active"); });
+      document.querySelectorAll(".tab-btn").forEach(function (t) { t.classList.remove("active"); });
       document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
       tab.classList.add("active");
-      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+      const targetPanel = document.getElementById("panel-" + tab.dataset.tab);
+      if (targetPanel) targetPanel.classList.add("active");
     });
   });
 
-  // ---------- settings modal ----------
+  // ---------- Settings Modal ----------
   const settingsModal = document.getElementById("settingsModal");
   function openSettings() {
     document.getElementById("serverUrl").value = getServerUrl();
     document.getElementById("apiKey").value = getApiKey();
     settingsModal.classList.add("show");
   }
+  function closeSettings() {
+    settingsModal.classList.remove("show");
+  }
   document.getElementById("openSettings").addEventListener("click", openSettings);
+  document.getElementById("closeSettingsBtn").addEventListener("click", closeSettings);
+  settingsModal.addEventListener("click", function (e) {
+    if (e.target === settingsModal) closeSettings();
+  });
+
   document.getElementById("saveSettingsBtn").addEventListener("click", function () {
     let url = document.getElementById("serverUrl").value.trim().replace(/\/+$/, "");
     let key = document.getElementById("apiKey").value.trim();
     localStorage.setItem(LS_SERVER, url);
     localStorage.setItem(LS_KEY, key);
-    settingsModal.classList.remove("show");
+    closeSettings();
+    showToast("设置已保存");
   });
+
   if (!getApiKey()) {
     openSettings();
   }
 
-  // ---------- fetch with retry ----------
+  // ---------- Advanced Options Accordion ----------
+  const optionsToggle = document.getElementById("optionsToggle");
+  const optionsContent = document.getElementById("optionsContent");
+  optionsToggle.addEventListener("click", function () {
+    const isOpen = optionsContent.classList.toggle("show");
+    optionsToggle.classList.toggle("open", isOpen);
+  });
+
+  // ---------- Fetch with Retry ----------
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
   async function fetchWithRetry(url, options, onStatus) {
@@ -336,78 +1366,132 @@
         const resp = await fetch(url, options);
         if (!resp.ok) {
           if (resp.status >= 400 && resp.status < 500) {
-            const err = new Error("server returned " + resp.status);
+            const err = new Error("服务器返回状态码 " + resp.status);
             err.nonRetryable = true;
             throw err;
           }
-          throw new Error("server returned " + resp.status);
+          throw new Error("服务器返回状态码 " + resp.status);
         }
         return resp;
       } catch (e) {
         if (e.nonRetryable || attempt >= maxRetries) throw e;
         attempt++;
         const backoff = 300 * Math.pow(2, attempt);
-        if (onStatus) onStatus("网络不佳,重试中 (" + attempt + "/" + maxRetries + ")...");
+        if (onStatus) onStatus("网络不佳，正在重试 (" + attempt + "/" + maxRetries + ")...");
         await sleep(backoff);
       }
     }
   }
 
   function apiHeaders(extra) {
-    const h = Object.assign({ "X-API-Key": getApiKey() }, extra || {});
-    return h;
+    return Object.assign({ "X-API-Key": getApiKey() }, extra || {});
   }
 
-  // ---------- PUT ----------
+  // ---------- PUT Type Sub Tabs (Mutually Exclusive Text vs File) ----------
+  let currentPutType = "text"; // "text" | "file"
+  const putSubText = document.getElementById("putSub-text");
+  const putSubFile = document.getElementById("putSub-file");
+
+  document.querySelectorAll(".sub-seg-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".sub-seg-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      currentPutType = btn.dataset.putType;
+      if (currentPutType === "text") {
+        putSubText.classList.add("active");
+        putSubFile.classList.remove("active");
+      } else {
+        putSubFile.classList.add("active");
+        putSubText.classList.remove("active");
+      }
+    });
+  });
+
+  // ---------- File Dropzone & Picker ----------
   let selectedFile = null;
   const dropzone = document.getElementById("dropzone");
+  const filePreview = document.getElementById("filePreview");
   const fileNameEl = document.getElementById("fileName");
+  const fileSizeEl = document.getElementById("fileSize");
+  const removeFileBtn = document.getElementById("removeFileBtn");
+
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.style.display = "none";
   document.body.appendChild(fileInput);
 
+  function formatBytes(bytes) {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+
+  function setFile(file) {
+    selectedFile = file;
+    if (file) {
+      fileNameEl.textContent = file.name;
+      fileSizeEl.textContent = formatBytes(file.size);
+      dropzone.style.display = "none";
+      filePreview.style.display = "flex";
+    } else {
+      fileInput.value = "";
+      dropzone.style.display = "flex";
+      filePreview.style.display = "none";
+      fileNameEl.textContent = "";
+      fileSizeEl.textContent = "";
+    }
+  }
+
   dropzone.addEventListener("click", function () { fileInput.click(); });
   fileInput.addEventListener("change", function () {
     if (fileInput.files && fileInput.files[0]) {
-      selectedFile = fileInput.files[0];
-      fileNameEl.textContent = selectedFile.name + " (" + selectedFile.size + " bytes)";
+      setFile(fileInput.files[0]);
     }
   });
+
   ["dragover", "dragenter"].forEach(function (evt) {
     dropzone.addEventListener(evt, function (e) {
       e.preventDefault();
       dropzone.classList.add("drag");
     });
   });
+
   ["dragleave", "drop"].forEach(function (evt) {
     dropzone.addEventListener(evt, function (e) {
       e.preventDefault();
       dropzone.classList.remove("drag");
     });
   });
+
   dropzone.addEventListener("drop", function (e) {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      selectedFile = e.dataTransfer.files[0];
-      fileNameEl.textContent = selectedFile.name + " (" + selectedFile.size + " bytes)";
+      setFile(e.dataTransfer.files[0]);
     }
   });
 
+  removeFileBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    setFile(null);
+  });
+
+  // ---------- Text Actions ----------
   document.getElementById("pasteBtn").addEventListener("click", async function () {
     try {
       const text = await navigator.clipboard.readText();
       document.getElementById("putText").value = text;
+      showToast("已从剪贴板粘贴");
     } catch (e) {
-      alert("无法读取剪切板: " + e.message);
+      showTopNotification("error", "剪贴板读取失败", "无法访问系统剪贴板: " + e.message);
     }
   });
-  document.getElementById("clearBtn").addEventListener("click", function () {
-    selectedFile = null;
-    fileInput.value = "";
-    fileNameEl.textContent = "";
+
+  document.getElementById("clearTextBtn").addEventListener("click", function () {
     document.getElementById("putText").value = "";
   });
 
+  // ---------- PUT Request Execution ----------
   function buildPutUrl() {
     const key = document.getElementById("putKey").value.trim();
     const ttl = document.getElementById("ttl").value.trim();
@@ -420,185 +1504,281 @@
     return url;
   }
 
-  document.getElementById("putBtn").addEventListener("click", async function () {
-    const statusEl = document.getElementById("putStatus");
-    const resultEl = document.getElementById("putResult");
-    const btn = document.getElementById("putBtn");
-    resultEl.classList.remove("show", "ok", "error");
-    statusEl.textContent = "";
+  const putBtn = document.getElementById("putBtn");
+  const putBtnText = document.getElementById("putBtnText");
 
-    const text = document.getElementById("putText").value;
-    if (!selectedFile && !text) {
-      alert("请选择文件或输入文本");
+  putBtn.addEventListener("click", async function () {
+    hideTopNotification();
+
+    const text = document.getElementById("putText").value.trim();
+
+    if (currentPutType === "text" && !text) {
+      showTopNotification("error", "提示", "请输入要分享的文本内容");
+      return;
+    }
+    if (currentPutType === "file" && !selectedFile) {
+      showTopNotification("error", "提示", "请选择要分享的文件");
       return;
     }
 
-    btn.disabled = true;
-    statusEl.textContent = "上传中...";
+    putBtn.disabled = true;
+    putBtnText.textContent = "上传中...";
+    showTopNotification("info", "上传中", "正在将内容同步至服务器...");
+
     try {
       const url = buildPutUrl();
       let options;
-      if (selectedFile) {
+      if (currentPutType === "file") {
         const form = new FormData();
         form.append("file", selectedFile, selectedFile.name);
         options = { method: "POST", headers: apiHeaders(), body: form };
       } else {
         options = {
           method: "POST",
-          headers: apiHeaders({ "Content-Type": "text/plain" }),
+          headers: apiHeaders({ "Content-Type": "text/plain; charset=utf-8" }),
           body: text,
         };
       }
-      const resp = await fetchWithRetry(url, options, function (msg) { statusEl.textContent = msg; });
+
+      const resp = await fetchWithRetry(url, options, function (msg) {
+        showTopNotification("info", "网络重试中", msg);
+      });
       const data = await resp.json();
-      statusEl.textContent = "";
-      resultEl.classList.add("show", "ok");
-      document.getElementById("putResultKey").textContent = data.share_key;
-      window.__lastShareKey = data.share_key;
+      const generatedKey = data.share_key;
+
+      // 1. Success Notification AT THE VERY TOP
+      const successHtml = `
+        <div class="key-hero">
+          <div style="font-size:13px; color:var(--text-secondary);">分享成功！您的 Share Key 为：</div>
+          <div class="key-value">${escapeHtml(generatedKey)}</div>
+          <div class="key-action-bar">
+            <button class="btn-primary btn-sm" style="flex:1;" id="topCopyKeyBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              复制 Share Key
+            </button>
+            <button class="btn-secondary btn-sm" style="flex:1;" id="topJumpGetBtn">
+              前往接收
+            </button>
+          </div>
+        </div>
+      `;
+      showTopNotification("ok", "分享成功", successHtml);
+
+      // Bind copy button
+      document.getElementById("topCopyKeyBtn").addEventListener("click", async function () {
+        try {
+          await navigator.clipboard.writeText(generatedKey);
+          showToast("Share Key 已复制到剪贴板");
+        } catch (e) {
+          showToast("复制失败，请手动选择复制");
+        }
+      });
+
+      // Bind jump button
+      document.getElementById("topJumpGetBtn").addEventListener("click", function () {
+        document.getElementById("tabGet").click();
+        document.getElementById("getKey").value = generatedKey;
+        document.getElementById("getBtn").click();
+      });
+
+      // 2. 清空输入内容, 防止重复提交
+      document.getElementById("putText").value = "";
+      setFile(null);
+      document.getElementById("putKey").value = "";
+
     } catch (e) {
-      statusEl.textContent = "";
-      resultEl.classList.add("show", "error");
-      resultEl.textContent = "失败: " + e.message;
+      showTopNotification("error", "分享失败", "错误信息: " + e.message);
     } finally {
-      btn.disabled = false;
+      putBtn.disabled = false;
+      putBtnText.textContent = "立即分享";
     }
   });
 
-  document.getElementById("copyKeyBtn").addEventListener("click", async function () {
-    if (window.__lastShareKey) {
-      try {
-        await navigator.clipboard.writeText(window.__lastShareKey);
-      } catch (e) { /* ignore */ }
-    }
-  });
-
-  // ---------- GET ----------
+  // ---------- GET (接收) ----------
   function filenameFromDisposition(disposition) {
     if (!disposition) return null;
-    const m = /filename="([^"]+)"/.exec(disposition);
-    return m ? m[1] : null;
+    const m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
+    return m ? decodeURIComponent(m[1]) : null;
   }
 
-  document.getElementById("getBtn").addEventListener("click", async function () {
-    const key = document.getElementById("getKey").value.trim();
-    const statusEl = document.getElementById("getStatus");
-    const resultEl = document.getElementById("getResult");
-    resultEl.classList.remove("show", "ok", "error");
-    resultEl.innerHTML = "";
-    if (!key) { alert("请输入 share_key"); return; }
+  const getBtn = document.getElementById("getBtn");
+  const getContentResult = document.getElementById("getContentResult");
 
-    statusEl.textContent = "获取中...";
+  getBtn.addEventListener("click", async function () {
+    hideTopNotification();
+    getContentResult.style.display = "none";
+    getContentResult.innerHTML = "";
+
+    const key = document.getElementById("getKey").value.trim();
+    if (!key) {
+      showTopNotification("error", "提示", "请输入 Share Key");
+      return;
+    }
+
+    getBtn.disabled = true;
+    showTopNotification("info", "获取中", "正在从服务器检索数据...");
+
     try {
       const url = getServerUrl() + "/get/" + encodeURIComponent(key);
-      const resp = await fetchWithRetry(url, { headers: apiHeaders() }, function (msg) { statusEl.textContent = msg; });
+      const resp = await fetchWithRetry(url, { headers: apiHeaders() }, function (msg) {
+        showTopNotification("info", "网络重试中", msg);
+      });
+
       const contentType = resp.headers.get("Content-Type") || "";
-      statusEl.textContent = "";
-      resultEl.classList.add("show", "ok");
+      hideTopNotification();
 
       if (contentType.indexOf("text/plain") === 0) {
         const text = await resp.text();
-        const pre = document.createElement("pre");
-        pre.className = "text-view";
-        pre.textContent = text;
-        resultEl.appendChild(pre);
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "secondary";
-        copyBtn.style.marginTop = "8px";
-        copyBtn.textContent = "复制文本";
-        copyBtn.addEventListener("click", function () { navigator.clipboard.writeText(text).catch(function(){}); });
-        resultEl.appendChild(copyBtn);
+        getContentResult.style.display = "flex";
+        getContentResult.innerHTML = `
+          <label class="field-label">获取到的文本内容</label>
+          <pre class="text-view">${escapeHtml(text)}</pre>
+          <button class="btn-secondary" id="copyGetTextBtn">
+            <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            复制文本内容
+          </button>
+        `;
+        document.getElementById("copyGetTextBtn").addEventListener("click", async function () {
+          try {
+            await navigator.clipboard.writeText(text);
+            showToast("文本已复制到剪贴板");
+          } catch (e) {
+            showToast("复制失败");
+          }
+        });
       } else {
         const disposition = resp.headers.get("Content-Disposition");
-        const filename = filenameFromDisposition(disposition) || key;
+        const filename = filenameFromDisposition(disposition) || ("download_" + key);
         const blob = await resp.blob();
         const dlUrl = URL.createObjectURL(blob);
+
+        getContentResult.style.display = "flex";
+        getContentResult.innerHTML = `
+          <label class="field-label">文件准备就绪</label>
+          <div class="file-preview">
+            <div class="file-preview-left">
+              <div class="file-preview-icon">
+                <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+              </div>
+              <div class="file-preview-meta">
+                <div class="file-name">${escapeHtml(filename)}</div>
+                <div class="file-size">${formatBytes(blob.size)}</div>
+              </div>
+            </div>
+          </div>
+          <a class="btn-primary" href="${dlUrl}" download="${escapeHtml(filename)}" id="autoDlLink" style="text-decoration:none;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            下载文件 (${formatBytes(blob.size)})
+          </a>
+        `;
+
+        // Auto trigger download
         const a = document.createElement("a");
         a.href = dlUrl;
         a.download = filename;
-        a.textContent = "下载 " + filename;
-        a.className = "secondary";
-        a.style.display = "block";
-        a.style.textAlign = "center";
-        a.style.padding = "12px";
-        a.style.textDecoration = "none";
-        a.style.color = "var(--text)";
-        resultEl.appendChild(a);
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
+        showToast("已开始下载 " + filename);
       }
     } catch (e) {
-      statusEl.textContent = "";
-      resultEl.classList.add("show", "error");
-      resultEl.textContent = "失败: " + e.message;
+      showTopNotification("error", "获取失败", "无法获取内容: " + e.message);
+    } finally {
+      getBtn.disabled = false;
     }
   });
 
-  // ---------- LIST ----------
+  // ---------- LIST (列表) ----------
   async function loadList() {
     const body = document.getElementById("listBody");
-    body.textContent = "加载中...";
+    body.innerHTML = '<div class="empty-state">正在加载公开分享...</div>';
+
     try {
       const url = getServerUrl() + "/list";
       const resp = await fetchWithRetry(url, { headers: apiHeaders() });
       const items = await resp.json();
       body.innerHTML = "";
-      if (!items.length) {
-        body.textContent = "(暂无公开分享)";
+
+      if (!items || !items.length) {
+        body.innerHTML = '<div class="empty-state">暂无公开分享记录</div>';
         return;
       }
+
       items.forEach(function (item) {
         const row = document.createElement("div");
         row.className = "list-item";
+
         const left = document.createElement("div");
+        left.className = "list-item-left";
+
         const keyEl = document.createElement("div");
-        keyEl.className = "key";
+        keyEl.className = "list-item-key";
         keyEl.textContent = item.share_key;
+
         const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = item.kind + (item.raw_file_name ? " · " + item.raw_file_name : "");
+        meta.className = "list-item-meta";
+        meta.textContent = (item.kind === "file" ? "文件" : "文本") + (item.raw_file_name ? " · " + item.raw_file_name : "");
+
         left.appendChild(keyEl);
         left.appendChild(meta);
-        const btnGroup = document.createElement("div");
-        btnGroup.style.display = "flex";
-        btnGroup.style.gap = "8px";
 
-        const btn = document.createElement("button");
-        btn.textContent = "获取";
-        btn.addEventListener("click", function () {
-          document.querySelector('.tab[data-tab="get"]').click();
+        const actions = document.createElement("div");
+        actions.className = "list-item-actions";
+
+        const getBtnItem = document.createElement("button");
+        getBtnItem.className = "btn-secondary btn-sm";
+        getBtnItem.textContent = "获取";
+        getBtnItem.addEventListener("click", function () {
+          document.getElementById("tabGet").click();
           document.getElementById("getKey").value = item.share_key;
           document.getElementById("getBtn").click();
         });
 
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "删除";
-        delBtn.style.color = "var(--danger)";
-        delBtn.addEventListener("click", async function () {
-          if (!confirm("确认删除 share_key " + item.share_key + " ?")) return;
-          delBtn.disabled = true;
+        const delBtnItem = document.createElement("button");
+        delBtnItem.className = "btn-secondary btn-sm";
+        delBtnItem.style.color = "var(--danger)";
+        delBtnItem.textContent = "删除";
+        delBtnItem.addEventListener("click", async function () {
+          if (!confirm("确认删除 Share Key [" + item.share_key + "] 吗？")) return;
+          delBtnItem.disabled = true;
           try {
             await fetchWithRetry(
               getServerUrl() + "/delete/" + encodeURIComponent(item.share_key),
               { method: "DELETE", headers: apiHeaders() }
             );
+            showToast("已删除 " + item.share_key);
             loadList();
           } catch (e) {
             alert("删除失败: " + e.message);
-            delBtn.disabled = false;
+            delBtnItem.disabled = false;
           }
         });
 
-        btnGroup.appendChild(btn);
-        btnGroup.appendChild(delBtn);
+        actions.appendChild(getBtnItem);
+        actions.appendChild(delBtnItem);
+
         row.appendChild(left);
-        row.appendChild(btnGroup);
+        row.appendChild(actions);
         body.appendChild(row);
       });
     } catch (e) {
-      body.textContent = "加载失败: " + e.message;
+      body.innerHTML = '<div class="empty-state" style="color:var(--danger)">加载失败: ' + escapeHtml(e.message) + '</div>';
     }
   }
+
   document.getElementById("refreshListBtn").addEventListener("click", loadList);
-  document.querySelector('.tab[data-tab="list"]').addEventListener("click", loadList);
+  document.getElementById("tabList").addEventListener("click", loadList);
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
 })();
 </script>
 </body>
