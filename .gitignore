@@ -14,5 +14,8 @@ Thumbs.db
 .vscode/
 .idea/
 
+# packaged zip artifacts
+dist/
+
 # Local documentation
 /.doc/

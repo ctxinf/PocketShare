@@ -5,19 +5,19 @@ use std::path::PathBuf;
 
 #[derive(Parser, Debug, Clone)]
 pub struct Args {
-    #[arg(long, env = "SHARE_LISTEN_ADDR", default_value = "127.0.0.1:3000")]
+    #[arg(long, env = "MYSHARE_LISTEN_ADDR", default_value = "127.0.0.1:3000")]
     pub listen_addr: String,
 
-    #[arg(long, env = "SHARE_DATA_DIR", default_value = "./data")]
+    #[arg(long, env = "MYSHARE_DATA_DIR", default_value = "./data")]
     pub data_dir: PathBuf,
 
-    #[arg(long, env = "SHARE_MAX_FILE_BYTES", default_value_t = 100 * 1024 * 1024)]
+    #[arg(long, env = "MYSHARE_MAX_FILE_BYTES", default_value_t = 100 * 1024 * 1024)]
     pub max_file_bytes: u64,
 
-    #[arg(long, env = "SHARE_DEFAULT_TTL_SECS", default_value_t = 3600)]
+    #[arg(long, env = "MYSHARE_DEFAULT_TTL_SECS", default_value_t = 3600)]
     pub default_ttl_secs: i64,
 
-    #[arg(long, env = "SHARE_CLEANUP_INTERVAL_SECS", default_value_t = 60)]
+    #[arg(long, env = "MYSHARE_CLEANUP_INTERVAL_SECS", default_value_t = 60)]
     pub cleanup_interval_secs: u64,
 }
 
@@ -35,7 +35,7 @@ impl Config {
         fs::create_dir_all(&args.data_dir)?;
         let assets_dir = args.data_dir.join("assets");
         fs::create_dir_all(&assets_dir)?;
-        let db_path = args.data_dir.join("share.sqlite");
+        let db_path = args.data_dir.join("myshare.sqlite");
         let api_key = load_or_create_api_key(&args.data_dir)?;
         Ok(Config { args, api_key, db_path, assets_dir })
     }
