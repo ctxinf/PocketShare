@@ -46,7 +46,7 @@ async fn handle_put(
         .unwrap_or("")
         .to_string();
 
-    let max_bytes = state.config.args.max_file_bytes;
+    let max_bytes = state.config.settings.max_file_bytes;
 
     let (kind, raw_file_name, data): (&str, Option<String>, Vec<u8>) =
         if content_type.starts_with("multipart/form-data") {
@@ -85,7 +85,7 @@ async fn handle_put(
         };
 
     let now = now_ts();
-    let ttl = query.ttl_secs.unwrap_or(state.config.args.default_ttl_secs);
+    let ttl = query.ttl_secs.unwrap_or(state.config.settings.default_ttl_secs);
     let expires_at = now + ttl.max(0);
     let is_public = query.public.unwrap_or(true);
 

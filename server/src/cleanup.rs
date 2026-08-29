@@ -2,7 +2,7 @@ use crate::AppState;
 use std::time::Duration;
 
 pub fn spawn(state: AppState) {
-    let interval_secs = state.config.args.cleanup_interval_secs;
+    let interval_secs = state.config.settings.cleanup_interval_secs;
     tokio::spawn(async move {
         let mut ticker = tokio::time::interval(Duration::from_secs(interval_secs));
         loop {

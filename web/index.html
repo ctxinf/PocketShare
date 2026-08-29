@@ -1195,7 +1195,7 @@
     <div class="modal-body">
       <div class="form-group">
         <label class="field-label" for="serverUrl">服务器地址</label>
-        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:8080">
+        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:3000 或 https://example.com/myshare">
       </div>
       <div class="form-group">
         <label class="field-label" for="apiKey">API Key</label>
@@ -1217,7 +1217,15 @@
   const LS_KEY = "share.apiKey";
   const LS_THEME = "share.theme";
 
-  function getServerUrl() { return localStorage.getItem(LS_SERVER) || window.location.origin; }
+  // Injected by the server from --path-prefix; stays as the literal placeholder
+  // when index.html is opened straight off disk, which means "no prefix".
+  const PATH_PREFIX = (function () {
+    const injected = "__MYSHARE_PATH_PREFIX__";
+    return injected.indexOf("MYSHARE_PATH_PREFIX") !== -1 ? "" : injected;
+  })();
+
+  function defaultServerUrl() { return window.location.origin + PATH_PREFIX; }
+  function getServerUrl() { return localStorage.getItem(LS_SERVER) || defaultServerUrl(); }
   function getApiKey() { return localStorage.getItem(LS_KEY) || ""; }
 
   // ---------- Theme Switcher (Apple 2026 Adaptive & Manual) ----------

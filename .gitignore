@@ -6,6 +6,9 @@ target/
 server/data/
 **/data/
 
+# Local dev config (see DEV_TESTING.md)
+dev-config.toml
+
 # OS / Editor files
 .DS_Store
 Thumbs.db
