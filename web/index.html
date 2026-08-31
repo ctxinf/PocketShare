@@ -6,6 +6,18 @@
 <meta name="theme-color" content="#08090a" id="metaThemeColor">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230a84ff'/%3E%3Cstop offset='100%25' stop-color='%230055d6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M35 40 L50 25 L65 40'/%3E%3Cline x1='50' y1='25' x2='50' y2='62'/%3E%3Cpath d='M28 54 v14 a6 6 0 0 0 6 6 h32 a6 6 0 0 0 6 -6 V54'/%3E%3C/g%3E%3C/svg%3E">
 <title>🔗 Share</title>
+
+<!-- PWA. The manifest href is rewritten by the server when a path prefix is
+     configured; it stays a bare relative path when opened straight off disk. -->
+<link rel="manifest" href="__MYSHARE_PATH_PREFIX__/manifest.webmanifest">
+<link rel="apple-touch-icon" href="__MYSHARE_PATH_PREFIX__/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- black-translucent lets the page paint under the status bar, which is what
+     viewport-fit=cover + the safe-area padding below already assume. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Share">
+<meta name="application-name" content="Share">
 <style>
   :root {
     --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -306,6 +318,57 @@
     line-height: 1.5;
     color: var(--text);
     word-break: break-word;
+  }
+
+  /* Upload progress (shown inside the top notification banner) */
+  .progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0 2px;
+  }
+
+  .progress-track {
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-subtle);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: var(--radius-pill);
+    background: var(--accent-gradient);
+    /* Only the width animates; a transition on `all` would also animate the
+       color and make fast uploads look laggy. */
+    transition: width 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Once the bytes are out but the server hasn't answered, the bar can't
+     advance any further -- pulse it so it doesn't read as a freeze. */
+  .progress-fill.pending {
+    animation: progress-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes progress-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+    .progress-fill.pending { animation: none; }
   }
 
   .key-hero {
@@ -1391,6 +1454,73 @@
     }
   }
 
+  // ---------- Upload with Progress ----------
+  // fetch() cannot report upload progress -- there is no event for bytes sent,
+  // and the streaming-request alternative needs HTTP/2 and isn't usable here.
+  // XHR's upload.onprogress is the only portable way, so uploads go through
+  // XHR while every other call stays on fetch().
+  function xhrUpload(url, body, headers, onProgress) {
+    return new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      Object.keys(headers).forEach(function (k) {
+        xhr.setRequestHeader(k, headers[k]);
+      });
+
+      xhr.upload.addEventListener("progress", function (e) {
+        // lengthComputable is false when the total isn't known; without a
+        // total there is no meaningful percentage to show.
+        if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total);
+      });
+
+      xhr.addEventListener("load", function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(xhr.responseText);
+          return;
+        }
+        const err = new Error("服务器返回状态码 " + xhr.status);
+        // 4xx means the request itself is wrong (bad key, too large); resending
+        // it unchanged would just fail again.
+        if (xhr.status >= 400 && xhr.status < 500) err.nonRetryable = true;
+        reject(err);
+      });
+      xhr.addEventListener("error", function () { reject(new Error("网络错误")); });
+      xhr.addEventListener("timeout", function () { reject(new Error("请求超时")); });
+      xhr.addEventListener("abort", function () {
+        const err = new Error("上传已取消");
+        err.nonRetryable = true;
+        reject(err);
+      });
+
+      xhr.send(body);
+    });
+  }
+
+  async function uploadWithRetry(url, makeBody, headers, onProgress, onStatus) {
+    const maxRetries = 4;
+    let attempt = 0;
+    while (true) {
+      try {
+        // A retry resends from byte 0, so the bar restarts too.
+        if (onProgress) onProgress(0, 0);
+        return await xhrUpload(url, makeBody(), headers, onProgress);
+      } catch (e) {
+        if (e.nonRetryable || attempt >= maxRetries) throw e;
+        attempt++;
+        const backoff = 300 * Math.pow(2, attempt);
+        if (onStatus) onStatus("网络不佳，正在重试 (" + attempt + "/" + maxRetries + ")...");
+        await sleep(backoff);
+      }
+    }
+  }
+
+  function humanBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+    if (n < 1024 * 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
+    return (n / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+  }
+
   function apiHeaders(extra) {
     return Object.assign({ "X-API-Key": getApiKey() }, extra || {});
   }
@@ -1515,6 +1645,40 @@
   const putBtn = document.getElementById("putBtn");
   const putBtnText = document.getElementById("putBtnText");
 
+  // Renders the upload bar into the top notification banner. Reuses the
+  // existing nodes once created, so a progress event doesn't rebuild the DOM
+  // dozens of times per second.
+  function showUploadProgress(loaded, total) {
+    const pct = total > 0 ? Math.min(100, (loaded / total) * 100) : 0;
+    let fill = document.getElementById("uploadProgressFill");
+
+    if (!fill) {
+      showTopNotification(
+        "info",
+        "上传中",
+        '<div class="progress-wrap">' +
+          '<div class="progress-track"><div class="progress-fill" id="uploadProgressFill"></div></div>' +
+          '<div class="progress-meta">' +
+            '<span id="uploadProgressBytes"></span>' +
+            '<span id="uploadProgressPct"></span>' +
+          "</div>" +
+        "</div>"
+      );
+      fill = document.getElementById("uploadProgressFill");
+    }
+
+    fill.style.width = pct.toFixed(1) + "%";
+    document.getElementById("uploadProgressBytes").textContent =
+      humanBytes(loaded) + " / " + humanBytes(total);
+
+    // At 100% the bytes have left the browser but the server is still storing
+    // them, so the label says so rather than showing a stalled "100%".
+    const atEnd = total > 0 && loaded >= total;
+    fill.classList.toggle("pending", atEnd);
+    document.getElementById("uploadProgressPct").textContent =
+      atEnd ? "等待服务器处理..." : pct.toFixed(0) + "%";
+  }
+
   putBtn.addEventListener("click", async function () {
     hideTopNotification();
 
@@ -1531,27 +1695,40 @@
 
     putBtn.disabled = true;
     putBtnText.textContent = "上传中...";
-    showTopNotification("info", "上传中", "正在将内容同步至服务器...");
+
+    // Total is known up front: the file size, or the encoded byte length of
+    // the text (not .length, which counts UTF-16 units and under-counts CJK).
+    const totalBytes = currentPutType === "file"
+      ? selectedFile.size
+      : new TextEncoder().encode(text).length;
+
+    showUploadProgress(0, totalBytes);
 
     try {
       const url = buildPutUrl();
-      let options;
+      let makeBody, headers;
       if (currentPutType === "file") {
-        const form = new FormData();
-        form.append("file", selectedFile, selectedFile.name);
-        options = { method: "POST", headers: apiHeaders(), body: form };
-      } else {
-        options = {
-          method: "POST",
-          headers: apiHeaders({ "Content-Type": "text/plain; charset=utf-8" }),
-          body: text,
+        // Rebuilt per attempt: a FormData that has already been sent cannot
+        // be safely reused for a retry.
+        makeBody = function () {
+          const form = new FormData();
+          form.append("file", selectedFile, selectedFile.name);
+          return form;
         };
+        headers = apiHeaders();
+      } else {
+        makeBody = function () { return text; };
+        headers = apiHeaders({ "Content-Type": "text/plain; charset=utf-8" });
       }
 
-      const resp = await fetchWithRetry(url, options, function (msg) {
-        showTopNotification("info", "网络重试中", msg);
-      });
-      const data = await resp.json();
+      const responseText = await uploadWithRetry(
+        url,
+        makeBody,
+        headers,
+        function (loaded, total) { showUploadProgress(loaded, total || totalBytes); },
+        function (msg) { showTopNotification("info", "网络重试中", msg); }
+      );
+      const data = JSON.parse(responseText);
       const generatedKey = data.share_key;
 
       // 1. Success Notification AT THE VERY TOP
@@ -1776,6 +1953,63 @@
 
   document.getElementById("refreshListBtn").addEventListener("click", loadList);
   document.getElementById("tabList").addEventListener("click", loadList);
+
+  // ---------- PWA: service worker ----------
+  // Registered only over a secure context (https or localhost); on a plain-http
+  // LAN address the browser refuses anyway, so skip it rather than throwing.
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker
+        .register(PATH_PREFIX + "/sw.js", { scope: PATH_PREFIX + "/" })
+        .then(function (reg) {
+          // A worker sitting in `waiting` means a newer shell is already
+          // downloaded but the old one still controls this tab. Offer the
+          // swap instead of silently serving a stale UI.
+          function promptUpdate(worker) {
+            if (!worker) return;
+            showToast("有新版本，正在更新…");
+            worker.postMessage("skip-waiting");
+          }
+
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            promptUpdate(reg.waiting);
+          }
+
+          reg.addEventListener("updatefound", function () {
+            const installing = reg.installing;
+            if (!installing) return;
+            installing.addEventListener("statechange", function () {
+              // No existing controller means this is the very first install,
+              // which is not an "update" worth interrupting the user for.
+              if (installing.state === "installed" && navigator.serviceWorker.controller) {
+                promptUpdate(installing);
+              }
+            });
+          });
+        })
+        .catch(function () {
+          /* registration failures must never break the page */
+        });
+
+      let reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+    });
+  }
+
+  // ---------- PWA: launch shortcuts ----------
+  // manifest shortcuts land on ?tab=<name>; honour it, then strip the query so
+  // a later refresh doesn't keep forcing that tab.
+  (function () {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (!tab) return;
+    const btn = document.querySelector('.tab-btn[data-tab="' + tab.replace(/[^a-z]/gi, "") + '"]');
+    if (btn) btn.click();
+    history.replaceState(null, "", window.location.pathname);
+  })();
 
   function escapeHtml(str) {
     if (!str) return "";

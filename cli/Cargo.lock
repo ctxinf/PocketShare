@@ -881,7 +881,9 @@ name = "share"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bytes",
  "dirs",
+ "futures-util",
  "reqwest",
  "serde",
  "serde_json",

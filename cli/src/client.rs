@@ -1,8 +1,37 @@
 use crate::config::Config;
+use crate::progress::Progress;
 use crate::retry::{with_retry, NonRetryable};
 use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+
+/// Chunk size the upload body is sliced into. This is what bounds progress
+/// granularity: the counter can only advance once per chunk, so a huge chunk
+/// would make the bar jump. 64 KiB keeps updates smooth without adding
+/// meaningful per-chunk overhead.
+const UPLOAD_CHUNK: usize = 64 * 1024;
+
+/// Wraps an in-memory body as a stream that reports each chunk as it is handed
+/// to the socket, so the caller can draw a progress bar.
+///
+/// Note what this measures: bytes accepted by the local socket buffer, not
+/// bytes durably stored by the server. The two diverge on a slow link, which
+/// is why the caller switches to a "waiting for server" message at 100% rather
+/// than claiming the upload is done.
+fn counting_body(bytes: Vec<u8>, progress: Arc<Mutex<Progress>>) -> reqwest::Body {
+    let total_chunks = bytes.len().div_ceil(UPLOAD_CHUNK).max(1);
+    let stream = futures_util::stream::iter((0..total_chunks).map(move |i| {
+        let start = i * UPLOAD_CHUNK;
+        let end = ((i + 1) * UPLOAD_CHUNK).min(bytes.len());
+        let chunk = bytes::Bytes::copy_from_slice(&bytes[start..end]);
+        if let Ok(mut p) = progress.lock() {
+            p.add(chunk.len() as u64);
+        }
+        Ok::<_, std::io::Error>(chunk)
+    }));
+    reqwest::Body::wrap_stream(stream)
+}
 
 #[derive(Deserialize)]
 struct PutResponse {
@@ -60,20 +89,33 @@ pub async fn put_content(
     public: Option<bool>,
 ) -> Result<String> {
     let url = put_url(cfg, key, ttl, public);
-    let resp: PutResponse = with_retry(|| async {
+    let progress = Arc::new(Mutex::new(Progress::new(content.len() as u64)));
+    let resp: Result<PutResponse> = with_retry(|| async {
+        // Each attempt re-sends from byte 0, so the bar has to start over too.
+        if let Ok(mut p) = progress.lock() {
+            p.reset();
+        }
+        let body = counting_body(content.to_vec(), progress.clone());
         let resp = client()
             .post(&url)
             .header("X-API-Key", &cfg.api_key)
             .header("Content-Type", "text/plain")
-            .body(content.to_vec())
+            .header(reqwest::header::CONTENT_LENGTH, content.len())
+            .body(body)
             .send()
             .await
             .context("network error")?;
+        if let Ok(mut p) = progress.lock() {
+            p.finish_upload();
+        }
         check_status(&resp)?;
         Ok(resp.json::<PutResponse>().await.context("bad response body")?)
     })
-    .await?;
-    Ok(resp.share_key)
+    .await;
+    if let Ok(p) = progress.lock() {
+        p.clear();
+    }
+    Ok(resp?.share_key)
 }
 
 pub async fn put_file(
@@ -91,21 +133,58 @@ pub async fn put_file(
         .to_string();
     let bytes = std::fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
 
-    let resp: PutResponse = with_retry(|| async {
-        let part = reqwest::multipart::Part::bytes(bytes.clone()).file_name(file_name.clone());
-        let form = reqwest::multipart::Form::new().part("file", part);
+    // The multipart envelope is assembled by hand rather than with
+    // `reqwest::multipart`, because progress needs an exact total up front and
+    // needs the file bytes to flow through the counting stream. The framing is
+    // a few hundred bytes, so counting the whole body keeps the bar honest --
+    // it reaches 100% exactly when the last byte is out.
+    const BOUNDARY: &str = "----myshare-boundary-7Ph3nQx2Kd";
+    let head = format!(
+        "--{BOUNDARY}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{}\"\r\n\
+         Content-Type: application/octet-stream\r\n\r\n",
+        // A quote or newline in the filename would break out of the header;
+        // strip rather than reject, since the name is cosmetic here.
+        file_name.replace(['"', '\r', '\n'], "")
+    );
+    let tail = format!("\r\n--{BOUNDARY}--\r\n");
+
+    let mut body_bytes = Vec::with_capacity(head.len() + bytes.len() + tail.len());
+    body_bytes.extend_from_slice(head.as_bytes());
+    body_bytes.extend_from_slice(&bytes);
+    body_bytes.extend_from_slice(tail.as_bytes());
+    drop(bytes);
+
+    let total = body_bytes.len();
+    let progress = Arc::new(Mutex::new(Progress::new(total as u64)));
+
+    let resp: Result<PutResponse> = with_retry(|| async {
+        if let Ok(mut p) = progress.lock() {
+            p.reset();
+        }
+        let body = counting_body(body_bytes.clone(), progress.clone());
         let resp = client()
             .post(&url)
             .header("X-API-Key", &cfg.api_key)
-            .multipart(form)
+            .header(
+                reqwest::header::CONTENT_TYPE,
+                format!("multipart/form-data; boundary={BOUNDARY}"),
+            )
+            .header(reqwest::header::CONTENT_LENGTH, total)
+            .body(body)
             .send()
             .await
             .context("network error")?;
+        if let Ok(mut p) = progress.lock() {
+            p.finish_upload();
+        }
         check_status(&resp)?;
         Ok(resp.json::<PutResponse>().await.context("bad response body")?)
     })
-    .await?;
-    Ok(resp.share_key)
+    .await;
+    if let Ok(p) = progress.lock() {
+        p.clear();
+    }
+    Ok(resp?.share_key)
 }
 
 pub async fn get(cfg: &Config, key: &str) -> Result<GetResult> {

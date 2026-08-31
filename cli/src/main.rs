@@ -1,5 +1,6 @@
 mod client;
 mod config;
+mod progress;
 mod retry;
 
 use anyhow::{bail, Context, Result};
