@@ -26,14 +26,6 @@ curl -fLsS "$base/$asset.sha256" -o "$work_dir/$asset.sha256"
 (cd "$work_dir"; if command -v sha256sum >/dev/null 2>&1; then sha256sum -c "$asset.sha256"; else shasum -a 256 -c "$asset.sha256"; fi)
 tar -xzf "$work_dir/$asset" -C "$work_dir"
 mkdir -p "$INSTALL_BIN_DIR"
-install -m 755 "$work_dir/bin/pocket-share-server" "$INSTALL_BIN_DIR/.pocket-share-server.new"
-mv -f "$INSTALL_BIN_DIR/.pocket-share-server.new" "$INSTALL_BIN_DIR/pocket-share-server"
 install -m 755 "$work_dir/bin/pshare" "$INSTALL_BIN_DIR/.pshare.new"
 mv -f "$INSTALL_BIN_DIR/.pshare.new" "$INSTALL_BIN_DIR/pshare"
-# Keep the Linux service installer available without starting a service automatically.
-if [ "$platform" = unknown-linux-gnu ]; then
-  mkdir -p "$INSTALL_BIN_DIR/pocketshare-systemd/bin"
-  cp "$work_dir/deploy.sh" "$INSTALL_BIN_DIR/pocketshare-systemd/deploy.sh"
-  cp "$work_dir/bin/"* "$INSTALL_BIN_DIR/pocketshare-systemd/bin/"
-fi
-printf 'Installed to %s. Add it to PATH.\nRun pocket-share-server to start; on Linux: bash %s/pocketshare-systemd/deploy.sh\n' "$INSTALL_BIN_DIR" "$INSTALL_BIN_DIR"
+printf 'Installed pshare to %s. Add it to PATH.\nRun pshare login <API_KEY> --server <URL> to connect.\n' "$INSTALL_BIN_DIR"
