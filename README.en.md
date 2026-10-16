@@ -1,29 +1,33 @@
-<h1 align="center"><img src="web/icon.svg" width="36" height="36" alt=""> PocketShare</h1>
+<h1 align="center"><img src="web/icon.svg" width="26" height="26" alt=""> PocketShare</h1>
 <p align="center"><a href="README.md">中文</a> · English</p>
 
-## Outline
-
-- [Installation](#1-installation)
-  - [Docker](#1-docker)
-  - [Binaries/systemd](#2-binariessystemd)
-  - [Local installation](#23-local-installation)
-  - [CLI installation](#3-cli-installation)
-- [Usage](#2-usage)
-- [Differences](#3-differences)
-
-Self-hosted sharing for personal use. Send text and files between devices over the internet.
-
-- Rust: server **5.1 MB**, CLI **4.1 MB**, idle server RSS approximately **7 MiB** (Linux amd64, stripped release); memory grows with uploads.
-- Plain HTTP C/S architecture with a simple protocol.
-- Simple embedded Web client with broad compatibility and PWA support.
-- Batteries-included `pshare` CLI: pipes, upload progress and retries.
-- API Key authentication only; no accounts or user management.
+<p align="center">A self-hosted tool for personal use. Share text and files across devices.</p>
 
 ![PocketShare overview: settings, sharing, share codes, and terminal retrieval](docs/screenshots/overview-full.png)
 
+- Plain HTTP with a simple C/S architecture, straightforward interactions and broad compatibility.
+- Web client: simple, works across devices, with mobile layouts and PWA support.
+- CLI client: convenient terminal access, also usable by agents.
+- Built with Rust, with low resource usage: server **5.1 MB**, CLI **4.1 MB**, idle server memory approximately **7 MiB**.
+- Simple to use: API Key authentication only, with no accounts or user management.
+
+
+## Contents
+
+- [1. Installation](#1-installation)
+  - [1. Docker](#1-docker)
+  - [2. Binaries/systemd](#2-binariessystemd)
+    - [2.1 Install with a script](#21-install-with-a-script)
+    - [2.2 Download directly](#22-download-directly)
+    - [2.3 Local installation](#23-local-installation)
+  - [3. CLI installation](#3-cli-installation)
+- [2. Usage](#2-usage)
+- [3. Comparison](#3-comparison)
+
 ## 1. Installation
 
-### 1. Docker
+<details id="1-docker">
+<summary>1. Docker</summary>
 
 Save as `compose.yml`:
 
@@ -47,9 +51,15 @@ docker compose exec pocketshare cat /data/api_key
 
 Open `http://localhost:3000` and enter the API Key. Data persists in the volume. For internet access, place an HTTPS reverse proxy in front of `127.0.0.1:3000`. Installing the PWA requires HTTPS or localhost.
 
-### 2. Binaries/systemd
+</details>
 
-#### 2.1 Install with a script
+<details id="2-binariessystemd">
+<summary>2. Binaries/systemd</summary>
+
+The server binary is `pocket-share-server`; the CLI uses the shorter name `pshare` for convenient typing.
+
+<details id="21-install-with-a-script">
+<summary>2.1 Install with a script</summary>
 
 Linux / macOS; installs the server to `~/.local/bin`, without Rust:
 
@@ -67,13 +77,19 @@ bash ~/.local/bin/pocketshare-systemd/deploy.sh
 
 To pin a version, download the script and run `VERSION=v0.1.0 sh install-server.sh`.
 
-#### 2.2 Download directly
+</details>
+
+<details id="22-download-directly">
+<summary>2.2 Download directly</summary>
 
 Download your OS/architecture from [Releases](https://github.com/ctxinf/PocketShare/releases/latest), extract, and run `bin/pocket-share-server` (`.exe` on Windows). The CLI is `bin/pshare`. On Linux, `bash deploy.sh` installs a systemd user service.
 
-The first run creates configuration and an API Key; startup logs show their locations. Restart after changing configuration.
+The first run creates configuration and an API Key; startup logs show their locations. Restart after changing configuration. See the [deployment guide](deploy/systemd/package-usage.md) for systemd details.
 
-#### 2.3 Local installation
+</details>
+
+<details id="23-local-installation">
+<summary>2.3 Local installation</summary>
 
 Install the Rust toolchain and C/C++ build tools, then build the server from source:
 
@@ -87,7 +103,12 @@ export PATH="$HOME/.local/bin:$PATH"
 pocket-share-server
 ```
 
-### 3. CLI installation
+</details>
+
+</details>
+
+<details id="3-cli-installation">
+<summary>3. CLI installation</summary>
 
 Install `pshare` separately on Linux / macOS, without the server or Rust:
 
@@ -104,12 +125,14 @@ cargo build --release --locked --manifest-path cli/Cargo.toml
 install -m 755 cli/target/release/pshare ~/.local/bin/
 ```
 
+</details>
+
 ## 2. Usage
 
 <details>
 <summary>1. Open Settings and enter the API Key</summary>
 
-Use the same server and API Key on each device.
+The server address defaults to the current page address. Use the same server and API Key on each device.
 
 ![1. Open Settings and enter the API Key](docs/screenshots/01-settings.png)
 
@@ -160,7 +183,10 @@ pshare delete <CODE>
 
 </details>
 
-## 3. Differences
+## 3. Comparison
 
-- [LocalSend](https://localsend.org/): LAN sharing and device discovery. PocketShare connects to your HTTP server over the internet.
-- [PocketChest](https://github.com/Hzao/PocketChest): serverless. PocketShare runs on your own machine.
+| Alternative | Approach | PocketShare |
+| --- | --- | --- |
+| WeChat File Transfer | Cloud service | Self-hosted alternative |
+| [LocalSend](https://localsend.org/) | LAN sharing, device discovery | HTTP server over the internet |
+| [PocketChest](https://github.com/Hzao/PocketChest) | Serverless | Runs on your own machine |
