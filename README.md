@@ -9,6 +9,8 @@
 - `pshare` CLI，终端 batteries included：管道、上传进度和重试。
 - 无登录注册、无用户管理，仅 API Key 鉴权。
 
+![PocketShare 操作概览：设置、分享、分享码与终端获取](docs/screenshots/overview-full.png)
+
 ## 1. 区分
 
 - [LocalSend](https://localsend.org/)：局域网共享、自动发现设备；本项目通过互联网访问部署好的 HTTP 服务。
@@ -82,7 +84,7 @@ bash ~/.local/bin/pocketshare-systemd/deploy.sh
 
 获得分享码；可在高级选项中设置有效期。
 
-![分享文本](docs/screenshots/02-share.png)
+![分享文件](docs/screenshots/02-share.png)
 
 </details>
 
@@ -107,6 +109,7 @@ bash ~/.local/bin/pocketshare-systemd/deploy.sh
 <details>
 <summary>5. 在终端中也可以进行分享和获取</summary>
 
+![终端查看列表并获取文件](docs/screenshots/05-cli.png)
 
 ```bash
 pshare login <API_KEY> --server https://share.example.com

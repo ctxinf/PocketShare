@@ -25,4 +25,4 @@ dist/
 
 # Python verification artifacts
 __pycache__/
-screenshots/
+/screenshots/

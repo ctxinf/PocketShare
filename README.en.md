@@ -9,6 +9,8 @@ Self-hosted sharing for personal use. Send text and files between devices over t
 - Batteries-included `pshare` CLI: pipes, upload progress and retries.
 - API Key authentication only; no accounts or user management.
 
+![PocketShare overview: settings, sharing, share codes, and terminal retrieval](docs/screenshots/overview-full.png)
+
 ## 1. Differences
 
 - [LocalSend](https://localsend.org/): LAN sharing and device discovery. PocketShare connects to your HTTP server over the internet.
@@ -106,6 +108,8 @@ Private shares are accessible by code and hidden from the list.
 
 <details>
 <summary>5. Share and receive from the terminal</summary>
+
+![List shares and retrieve a file from the terminal](docs/screenshots/05-cli.png)
 
 ```bash
 pshare login <API_KEY> --server https://share.example.com
