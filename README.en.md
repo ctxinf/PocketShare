@@ -29,6 +29,19 @@
 <details id="1-docker">
 <summary>1. Docker</summary>
 
+Save the following as `config.toml` next to `compose.yml` and edit it as needed:
+
+```toml
+listen_addr = "0.0.0.0:3000"
+data_dir = "/data"
+path_prefix = ""
+max_file_bytes = 104857600
+default_ttl_secs = 3600
+cleanup_interval_secs = 60
+```
+
+Inside the container, listen on `0.0.0.0`; keep `data_dir = "/data"` to use the persistent volume. The upload limit is in bytes; TTL and cleanup interval are in seconds. `path_prefix` sets a URL prefix (empty means the root path).
+
 Save as `compose.yml`:
 
 ```yaml
@@ -38,6 +51,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
+      - ./config.toml:/etc/pocketshare/config.toml:ro
       - pocketshare-data:/data
     restart: unless-stopped
 volumes:
@@ -51,12 +65,29 @@ docker compose exec pocketshare cat /data/api_key
 
 Open `http://localhost:3000` and enter the API Key. Data persists in the volume. For internet access, place an HTTPS reverse proxy in front of `127.0.0.1:3000`. Installing the PWA requires HTTPS or localhost.
 
+The host configuration is mounted read-only at `/etc/pocketshare/config.toml`. Create the file before starting the container. After edits, run `docker compose restart pocketshare`. If you change `path_prefix` or the internal port, also update the health check; port changes require updating the port mapping.
+
 </details>
 
 <details id="2-binariessystemd">
 <summary>2. Binaries/systemd</summary>
 
 The server binary is `pocket-share-server`; the CLI uses the shorter name `pshare` for convenient typing.
+
+The default server configuration on Linux/macOS is `~/.config/pocket-share-server/config.toml` (`$XDG_CONFIG_HOME` overrides `~/.config`). On Windows it is `%APPDATA%/pocket-share-server/config.toml`. Start once to generate it, or pass `pocket-share-server --config /path/to/config.toml`:
+
+```toml
+listen_addr = "127.0.0.1:3000"
+data_dir = "/home/<user>/.local/share/pocket-share-server"
+path_prefix = ""
+max_file_bytes = 104857600
+default_ttl_secs = 3600
+cleanup_interval_secs = 60
+```
+
+Replace `<user>` with your username and use an absolute path; TOML does not expand `~`. The generated file already contains the correct data path. Restart the server after editing. CLI configuration is stored under the system configuration directory as `pshare/config.json`.
+
+For existing installations, stop the old service and move the old configuration to the new location before starting. Keep its `data_dir` unchanged. While the server is stopped, rename the existing SQLite database to `pocketshare.sqlite`, along with any matching `-wal` and `-shm` files, to retain shares and the API Key. Move the CLI configuration to `pshare/config.json`, or log in again.
 
 <details id="21-install-with-a-script">
 <summary>2.1 Install with a script</summary>
@@ -75,7 +106,7 @@ On Linux, stop the foreground server and install the systemd user service:
 bash ~/.local/bin/pocketshare-systemd/deploy.sh
 ```
 
-To pin a version, download the script and run `VERSION=v0.1.0 sh install-server.sh`.
+To pin a version, download the script and run `VERSION=v0.2.0 sh install-server.sh`.
 
 </details>
 

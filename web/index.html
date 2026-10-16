@@ -9,8 +9,8 @@
 
 <!-- PWA. The manifest href is rewritten by the server when a path prefix is
      configured; it stays a bare relative path when opened straight off disk. -->
-<link rel="manifest" href="__MYSHARE_PATH_PREFIX__/manifest.webmanifest">
-<link rel="apple-touch-icon" href="__MYSHARE_PATH_PREFIX__/apple-touch-icon.png">
+<link rel="manifest" href="__POCKETSHARE_PATH_PREFIX__/manifest.webmanifest">
+<link rel="apple-touch-icon" href="__POCKETSHARE_PATH_PREFIX__/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!-- black-translucent lets the page paint under the status bar, which is what
@@ -1258,7 +1258,7 @@
     <div class="modal-body">
       <div class="form-group">
         <label class="field-label" for="serverUrl">服务器地址</label>
-        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:3000 或 https://example.com/myshare">
+        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:3000 或 https://example.com/pocketshare">
       </div>
       <div class="form-group">
         <label class="field-label" for="apiKey">API Key</label>
@@ -1283,8 +1283,8 @@
   // Injected by the server from --path-prefix; stays as the literal placeholder
   // when index.html is opened straight off disk, which means "no prefix".
   const PATH_PREFIX = (function () {
-    const injected = "__MYSHARE_PATH_PREFIX__";
-    return injected.indexOf("MYSHARE_PATH_PREFIX") !== -1 ? "" : injected;
+    const injected = "__POCKETSHARE_PATH_PREFIX__";
+    return injected.indexOf("POCKETSHARE_PATH_PREFIX") !== -1 ? "" : injected;
   })();
 
   function defaultServerUrl() { return window.location.origin + PATH_PREFIX; }

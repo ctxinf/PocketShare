@@ -138,7 +138,7 @@ pub async fn put_file(
     // needs the file bytes to flow through the counting stream. The framing is
     // a few hundred bytes, so counting the whole body keeps the bar honest --
     // it reaches 100% exactly when the last byte is out.
-    const BOUNDARY: &str = "----myshare-boundary-7Ph3nQx2Kd";
+    const BOUNDARY: &str = "----pocketshare-boundary-7Ph3nQx2Kd";
     let head = format!(
         "--{BOUNDARY}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{}\"\r\n\
          Content-Type: application/octet-stream\r\n\r\n",

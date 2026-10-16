@@ -3,34 +3,34 @@
   "short_name": "PocketShare",
   "description": "文本 / 文件 / 剪贴板 快速共享",
   "lang": "zh-CN",
-  "start_url": "__MYSHARE_PATH_PREFIX__/",
-  "scope": "__MYSHARE_PATH_PREFIX__/",
-  "id": "__MYSHARE_PATH_PREFIX__/",
+  "start_url": "__POCKETSHARE_PATH_PREFIX__/",
+  "scope": "__POCKETSHARE_PATH_PREFIX__/",
+  "id": "__POCKETSHARE_PATH_PREFIX__/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#050608",
   "theme_color": "#050608",
   "icons": [
     {
-      "src": "__MYSHARE_PATH_PREFIX__/icon.svg",
+      "src": "__POCKETSHARE_PATH_PREFIX__/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "__MYSHARE_PATH_PREFIX__/icon-192.png",
+      "src": "__POCKETSHARE_PATH_PREFIX__/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "__MYSHARE_PATH_PREFIX__/icon-512.png",
+      "src": "__POCKETSHARE_PATH_PREFIX__/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "__MYSHARE_PATH_PREFIX__/icon-maskable-512.png",
+      "src": "__POCKETSHARE_PATH_PREFIX__/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -40,17 +40,17 @@
     {
       "name": "分享",
       "short_name": "分享",
-      "url": "__MYSHARE_PATH_PREFIX__/?tab=put"
+      "url": "__POCKETSHARE_PATH_PREFIX__/?tab=put"
     },
     {
       "name": "接收",
       "short_name": "接收",
-      "url": "__MYSHARE_PATH_PREFIX__/?tab=get"
+      "url": "__POCKETSHARE_PATH_PREFIX__/?tab=get"
     },
     {
       "name": "列表",
       "short_name": "列表",
-      "url": "__MYSHARE_PATH_PREFIX__/?tab=list"
+      "url": "__POCKETSHARE_PATH_PREFIX__/?tab=list"
     }
   ]
 }

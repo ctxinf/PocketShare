@@ -57,15 +57,15 @@ fn config_home() -> PathBuf {
 }
 
 fn default_config_path() -> PathBuf {
-    config_home().join("myshare-server/config.toml")
+    config_home().join("pocket-share-server/config.toml")
 }
 
 fn default_data_dir() -> PathBuf {
     std::env::var_os("LOCALAPPDATA")
-        .map(|h| PathBuf::from(h).join("myshare-server"))
+        .map(|h| PathBuf::from(h).join("pocket-share-server"))
         .or_else(|| {
             std::env::var_os("HOME")
-                .map(|h| PathBuf::from(h).join(".local/share/myshare-server"))
+                .map(|h| PathBuf::from(h).join(".local/share/pocket-share-server"))
         })
         .unwrap_or_else(|| PathBuf::from("./data"))
 }
@@ -99,8 +99,8 @@ listen_addr = "{listen_addr}"
 data_dir = {data_dir}
 
 # 路径前缀。留空表示挂在域名根路径下。
-# 如果这台机器上域名根路径已经被别的服务占用,可以填 "/myshare",
-# 这样 Web 页面在 https://example.com/myshare/ ,接口也都在该前缀下。
+# 如果这台机器上域名根路径已经被别的服务占用,可以填 "/pocketshare",
+# 这样 Web 页面在 https://example.com/pocketshare/ ,接口也都在该前缀下。
 # 反向代理原样透传即可,不要 strip 掉前缀。
 path_prefix = "{path_prefix}"
 
@@ -146,7 +146,7 @@ impl Config {
         fs::create_dir_all(&settings.data_dir)?;
         let assets_dir = settings.data_dir.join("assets");
         fs::create_dir_all(&assets_dir)?;
-        let db_path = settings.data_dir.join("myshare.sqlite");
+        let db_path = settings.data_dir.join("pocketshare.sqlite");
         let api_key = load_or_create_api_key(&settings.data_dir)?;
         Ok(Config { settings, config_path: args.config, api_key, db_path, assets_dir })
     }
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn generated_config_round_trips_windows_paths() {
         let settings = Settings {
-            data_dir: PathBuf::from(r"C:\Users\test\AppData\Local\myshare-server"),
+            data_dir: PathBuf::from(r"C:\Users\test\AppData\Local\pocket-share-server"),
             ..Settings::default()
         };
         let parsed: Settings = toml::from_str(&config_template(&settings)).unwrap();

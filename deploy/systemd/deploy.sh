@@ -18,7 +18,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 INSTALL_BIN_DIR="${INSTALL_BIN_DIR:-$HOME/.local/bin}"
-CONFIG_FILE="${MYSHARE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/myshare-server/config.toml}"
+CONFIG_FILE="${POCKETSHARE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/pocket-share-server/config.toml}"
 
 ZIP_FILE="${1:-}"
 
@@ -48,11 +48,6 @@ else
   fi
 fi
 
-# Retire the previous service name before starting the renamed service.
-if [ -f "$HOME/.config/systemd/user/myshare-server.service" ]; then
-  systemctl --user disable --now myshare-server.service
-fi
-
 # When re-deploying over an existing install, the old server is still running
 # and holding the binary + sqlite db open. Stop it before overwriting, so an
 # upgrade is a clean stop -> replace -> start rather than a live swap.
@@ -64,8 +59,10 @@ fi
 
 mkdir -p "$INSTALL_BIN_DIR"
 cp "$PKG_DIR/bin/pocket-share-server" "$INSTALL_BIN_DIR/pocket-share-server"
-cp "$PKG_DIR/bin/pshare" "$INSTALL_BIN_DIR/pshare"
-chmod +x "$INSTALL_BIN_DIR/pocket-share-server" "$INSTALL_BIN_DIR/pshare"
+chmod +x "$INSTALL_BIN_DIR/pocket-share-server"
+if [ -f "$PKG_DIR/bin/pshare" ]; then
+  install -m 755 "$PKG_DIR/bin/pshare" "$INSTALL_BIN_DIR/pshare"
+fi
 echo "==> installed binaries to $INSTALL_BIN_DIR"
 
 mkdir -p "$(dirname "$CONFIG_FILE")"
@@ -108,7 +105,7 @@ read_conf() {
   sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*\"\(.*\)\".*/\1/p" "$CONFIG_FILE" 2>/dev/null | tail -n1
 }
 DATA_DIR=$(read_conf data_dir)
-DATA_DIR="${DATA_DIR:-$HOME/.local/share/myshare-server}"
+DATA_DIR="${DATA_DIR:-$HOME/.local/share/pocket-share-server}"
 LISTEN_ADDR=$(read_conf listen_addr)
 LISTEN_ADDR="${LISTEN_ADDR:-127.0.0.1:3000}"
 PATH_PREFIX=$(read_conf path_prefix)

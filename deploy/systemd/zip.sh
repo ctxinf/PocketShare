@@ -86,5 +86,5 @@ echo "拷贝到目标机器(同 OS/架构)后, 解压即可直接部署:"
 echo "  unzip $PKG_NAME.zip && cd $PKG_NAME && ./deploy.sh"
 echo
 echo "监听地址 / 数据目录 / 路径前缀等在配置文件里改, 改完重启服务:"
-echo "  \$EDITOR ~/.config/myshare-server/config.toml"
+echo "  \$EDITOR ~/.config/pocket-share-server/config.toml"
 echo "  systemctl --user restart pocket-share-server"

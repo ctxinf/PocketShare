@@ -29,7 +29,7 @@ const ICON_512_PNG: &[u8] = include_bytes!("../../web/icon-512.png");
 const ICON_MASKABLE_512_PNG: &[u8] = include_bytes!("../../web/icon-maskable-512.png");
 const APPLE_TOUCH_ICON_PNG: &[u8] = include_bytes!("../../web/apple-touch-icon.png");
 /// Replaced at startup with the configured `--path-prefix` before serving.
-const PATH_PREFIX_PLACEHOLDER: &str = "__MYSHARE_PATH_PREFIX__";
+const PATH_PREFIX_PLACEHOLDER: &str = "__POCKETSHARE_PATH_PREFIX__";
 
 /// Icons are immutable for a given build; the shell documents are not, so they
 /// must be revalidated or a redeploy can be pinned behind a stale HTTP cache.
@@ -163,8 +163,8 @@ async fn main() -> anyhow::Result<()> {
         .with_state(state.clone());
 
     let prefix = state.config.settings.path_prefix.clone();
-    // `nest` maps the inner `/` route onto the bare `/myshare` and claims the
-    // whole `/myshare/*` subtree, which leaves the trailing-slash form people
+    // `nest` maps the inner `/` route onto the bare `/pocketshare` and claims the
+    // whole `/pocketshare/*` subtree, which leaves the trailing-slash form people
     // actually paste into a browser unrouted. Catch it in the nested router's
     // fallback and serve the UI there.
     let app = if prefix.is_empty() {

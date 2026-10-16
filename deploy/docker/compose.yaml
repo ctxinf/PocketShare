@@ -7,6 +7,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
+      - ./config.toml:/etc/pocketshare/config.toml:ro
       - pocketshare-data:/data
     restart: unless-stopped
 volumes:

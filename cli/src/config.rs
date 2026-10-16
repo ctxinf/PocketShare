@@ -11,7 +11,7 @@ pub struct Config {
 pub fn config_path() -> Result<PathBuf> {
     let dir = dirs::config_dir()
         .context("could not determine config dir")?
-        .join("share-cli");
+        .join("pshare");
     std::fs::create_dir_all(&dir)?;
     Ok(dir.join("config.json"))
 }

@@ -35,8 +35,8 @@ cd PocketShare-<版本号>
 
 1. 把 `pocket-share-server` 和 `pshare` 装到 `~/.local/bin/`
 2. 写 systemd `--user` unit 并 `enable --now`
-3. server 首次启动时生成配置文件 `~/.config/myshare-server/config.toml`(带注释的默认值)
-4. 按配置建数据目录(默认 `~/.local/share/myshare-server`,存 sqlite db + 文件 + api_key)
+3. server 首次启动时生成配置文件 `~/.config/pocket-share-server/config.toml`(带注释的默认值)
+4. 按配置建数据目录(默认 `~/.local/share/pocket-share-server`,存 sqlite db + 文件 + api_key)
 5. 打印出配置文件路径和 api_key(登录 CLI / Web 都要用)
 
 也可以不解压,直接对着 zip 跑:
@@ -56,7 +56,7 @@ loginctl enable-linger $USER
 所有运行时配置都在一个 TOML 文件里,默认路径:
 
 ```
-~/.config/myshare-server/config.toml
+~/.config/pocket-share-server/config.toml
 ```
 
 (遵循 `XDG_CONFIG_HOME`;首次启动 server 时自动生成,带完整注释。)
@@ -64,7 +64,7 @@ loginctl enable-linger $USER
 **改配置的流程:编辑这个文件 → 重启服务。**
 
 ```bash
-$EDITOR ~/.config/myshare-server/config.toml
+$EDITOR ~/.config/pocket-share-server/config.toml
 systemctl --user restart pocket-share-server
 ```
 
@@ -76,7 +76,7 @@ systemctl --user restart pocket-share-server
 listen_addr = "127.0.0.1:3000"
 
 # 数据目录:sqlite 数据库、上传的文件、api_key 都放在这里。
-data_dir = "/home/<user>/.local/share/myshare-server"
+data_dir = "/home/<user>/.local/share/pocket-share-server"
 
 # 路径前缀。留空表示挂在域名根路径下,详见下一节。
 path_prefix = ""
@@ -98,27 +98,27 @@ $EDITOR ~/.config/systemd/user/pocket-share-server.service   # ExecStart=... --c
 systemctl --user daemon-reload && systemctl --user restart pocket-share-server
 ```
 
-部署时也可以用 `MYSHARE_CONFIG=/path/to/config.toml ./deploy.sh` 直接指定,
+部署时也可以用 `POCKETSHARE_CONFIG=/path/to/config.toml ./deploy.sh` 直接指定,
 `deploy.sh` 会把这个路径写进 unit 文件。
 
 ## 三、部署到共有域名的子路径下
 
 如果这台机器上已经有别的服务占着域名根路径,可以把 PocketShare 挂到一个子路径上,比如
-`https://example.com/myshare/`。在配置文件里设:
+`https://example.com/pocketshare/`。在配置文件里设:
 
 ```toml
-path_prefix = "/myshare"
+path_prefix = "/pocketshare"
 ```
 
 然后 `systemctl --user restart pocket-share-server`。
 
-这时所有接口都在前缀下面:`/myshare/health`、`/myshare/put`、`/myshare/get/<key>`、
-`/myshare/dl/<key>` 等等,Web 页面在 `https://example.com/myshare/`。
+这时所有接口都在前缀下面:`/pocketshare/health`、`/pocketshare/put`、`/pocketshare/get/<key>`、
+`/pocketshare/dl/<key>` 等等,Web 页面在 `https://example.com/pocketshare/`。
 
 前面挂 Nginx 反代时**不要**再 strip 前缀,直接原样透传即可:
 
 ```nginx
-location /myshare/ {
+location /pocketshare/ {
     proxy_pass http://127.0.0.1:3000;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-Proto $scheme;
@@ -130,7 +130,7 @@ Caddy:
 
 ```
 example.com {
-    handle /myshare/* {
+    handle /pocketshare/* {
         reverse_proxy 127.0.0.1:3000
     }
 }
@@ -139,7 +139,7 @@ example.com {
 Web 页面会自动感知自己所在的前缀,不需要手工填服务器地址。CLI 端登录时把前缀带上即可:
 
 ```bash
-pshare login <api_key> --server https://example.com/myshare
+pshare login <api_key> --server https://example.com/pocketshare
 ```
 
 ## 四、日常使用
@@ -156,8 +156,8 @@ pshare delete <share_key>
 pshare help                 # 会打印配置文件所在路径
 ```
 
-CLI 配置(server_url + api_key)保存在 `~/.config/share-cli/config.json`
-(或 `$XDG_CONFIG_HOME/share-cli/config.json`)。
+CLI 配置(server_url + api_key)保存在 `~/.config/pshare/config.json`
+(或 `$XDG_CONFIG_HOME/pshare/config.json`)。
 
 如果 `~/.local/bin` 不在 `PATH` 里,在 `~/.bashrc` / `~/.zshrc` 里加:
 
@@ -168,7 +168,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ### Web
 
 Web 页面已经编译进 server 二进制,启动后浏览器直接打开服务地址即可
-(根路径部署是 `http://<host>:3000/`,带前缀就是 `http://<host>:3000/myshare/`)。
+(根路径部署是 `http://<host>:3000/`,带前缀就是 `http://<host>:3000/pocketshare/`)。
 首次打开会要求填 api_key。
 
 ## 五、运维命令
@@ -190,8 +190,8 @@ systemctl --user disable --now pocket-share-server # 卸载服务(不删二进�
 systemctl --user disable --now pocket-share-server
 rm ~/.config/systemd/user/pocket-share-server.service
 rm ~/.local/bin/pocket-share-server ~/.local/bin/pshare
-rm ~/.config/myshare-server/config.toml
-rm -rf ~/.local/share/myshare-server   # 会删除所有已分享的数据,谨慎操作
+rm ~/.config/pocket-share-server/config.toml
+rm -rf ~/.local/share/pocket-share-server   # 会删除所有已分享的数据,谨慎操作
 ```
 
 ## 七、安全提醒
@@ -200,4 +200,6 @@ rm -rf ~/.local/share/myshare-server   # 会删除所有已分享的数据,谨�
 或在前面加一层反向代理 + HTTPS。鉴权只是简单的固定 `api_key`,加密是自定义混淆而非标准
 加密强度 —— 这是仅供个人使用的工具,不建议未加防护直接裸奔在公网上。
 
-配置目录沿用旧名以兼容已有安装:服务端 `myshare-server`,CLI `share-cli`。
+配置目录与程序名一致：服务端 `pocket-share-server`，CLI `pshare`。
+
+升级旧安装时，先停止服务，保留原数据目录，将原 SQLite 数据库及对应的 `-wal`、`-shm` 文件分别重命名为 `pocketshare.sqlite`、`pocketshare.sqlite-wal`、`pocketshare.sqlite-shm`，再启动新版本。

@@ -12,8 +12,8 @@
  */
 
 const PREFIX = (function () {
-  const injected = "__MYSHARE_PATH_PREFIX__";
-  return injected.indexOf("MYSHARE_PATH_PREFIX") !== -1 ? "" : injected;
+  const injected = "__POCKETSHARE_PATH_PREFIX__";
+  return injected.indexOf("POCKETSHARE_PATH_PREFIX") !== -1 ? "" : injected;
 })();
 
 // Bumping this drops every previously cached shell copy on activate.

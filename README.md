@@ -29,6 +29,19 @@
 <details id="1-docker">
 <summary>1. Docker</summary>
 
+先将以下内容保存为 `config.toml`，与 `compose.yml` 放在同一目录，按需修改：
+
+```toml
+listen_addr = "0.0.0.0:3000"
+data_dir = "/data"
+path_prefix = ""
+max_file_bytes = 104857600
+default_ttl_secs = 3600
+cleanup_interval_secs = 60
+```
+
+容器内监听 `0.0.0.0`；`data_dir = "/data"` 对应持久化 volume。文件上限单位为字节，有效期和清理间隔单位为秒；`path_prefix` 用于设置 URL 前缀，留空表示根路径。
+
 保存为 `compose.yml`：
 
 ```yaml
@@ -38,6 +51,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
+      - ./config.toml:/etc/pocketshare/config.toml:ro
       - pocketshare-data:/data
     restart: unless-stopped
 volumes:
@@ -51,12 +65,29 @@ docker compose exec pocketshare cat /data/api_key
 
 打开 `http://localhost:3000`，填入 API Key。数据保存在 volume 中。公网访问请配置 HTTPS 反向代理至 `127.0.0.1:3000`；PWA 安装需要 HTTPS 或 localhost。
 
+宿主机配置只读挂载到容器内 `/etc/pocketshare/config.toml`，请先创建文件再启动。修改后执行 `docker compose restart pocketshare`。若修改 `path_prefix` 或容器内端口，还需同步调整健康检查；端口变化也需更新端口映射。
+
 </details>
 
 <details id="2-二进制systemd">
 <summary>2. 二进制/systemd</summary>
 
 服务端程序名为 `pocket-share-server`；CLI 程序名为 `pshare`，采用缩写方便手动输入。
+
+Linux/macOS 默认服务端配置为 `~/.config/pocket-share-server/config.toml`（可用 `$XDG_CONFIG_HOME` 替换 `~/.config`），Windows 为 `%APPDATA%/pocket-share-server/config.toml`。首次启动自动生成，也可用 `pocket-share-server --config /path/to/config.toml` 指定：
+
+```toml
+listen_addr = "127.0.0.1:3000"
+data_dir = "/home/<user>/.local/share/pocket-share-server"
+path_prefix = ""
+max_file_bytes = 104857600
+default_ttl_secs = 3600
+cleanup_interval_secs = 60
+```
+
+将 `<user>` 替换为用户名并使用绝对路径，TOML 不会展开 `~`；自动生成的配置已填好实际数据路径。修改后重启服务。CLI 配置位于系统配置目录下的 `pshare/config.json`。
+
+已有安装请先停止旧服务，将原配置移到新位置再启动；保留原 `data_dir`，并在停服后将原 SQLite 数据库重命名为 `pocketshare.sqlite`（如有同名 `-wal`、`-shm` 文件，也需一并重命名），即可继续使用已有分享和 API Key。CLI 配置移到 `pshare/config.json`，或重新登录。
 
 <details id="21-通过脚本安装">
 <summary>2.1 通过脚本安装</summary>
@@ -75,7 +106,7 @@ Linux 如需 systemd 后台运行，停止前台服务后执行：
 bash ~/.local/bin/pocketshare-systemd/deploy.sh
 ```
 
-可用 `VERSION=v0.1.0` 指定版本（下载脚本后执行 `VERSION=v0.1.0 sh install-server.sh`）。
+可用 `VERSION=v0.2.0` 指定版本（下载脚本后执行 `VERSION=v0.2.0 sh install-server.sh`）。
 
 </details>
 

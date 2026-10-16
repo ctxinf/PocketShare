@@ -9,6 +9,7 @@ import urllib.request
 import urllib.error
 import socket
 
+prefix = os.environ.get("SMOKE_PATH_PREFIX", "")
 server, cli = map(lambda p: str(Path(p).resolve()), sys.argv[1:])
 with tempfile.TemporaryDirectory(prefix='pocketshare-') as tmp:
     root = Path(tmp)
@@ -18,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='pocketshare-') as tmp:
     # First-run configuration must be parseable on Windows as well.
     first = subprocess.Popen([server], env=env, stdout=subprocess.DEVNULL)
     try:
-        generated = root / 'myshare-server' / 'config.toml'
+        generated = root / 'pocket-share-server' / 'config.toml'
         for _ in range(100):
             if generated.exists() and generated.stat().st_size:
                 break
@@ -32,9 +33,9 @@ with tempfile.TemporaryDirectory(prefix='pocketshare-') as tmp:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
     config = root / 'smoke.toml'
-    config.write_text(f'listen_addr = "127.0.0.1:{port}"\ndata_dir = "{root.as_posix()}/data"\n')
+    config.write_text(f'path_prefix = "{prefix}"\nlisten_addr = "127.0.0.1:{port}"\ndata_dir = "{root.as_posix()}/data"\n')
     process = subprocess.Popen([server, '--config', str(config)], env=env)
-    base = f'http://127.0.0.1:{port}'
+    base = f'http://127.0.0.1:{port}{prefix}'
     try:
         for _ in range(100):
             try:
@@ -64,6 +65,13 @@ with tempfile.TemporaryDirectory(prefix='pocketshare-') as tmp:
         assert key not in run('list')
         with urllib.request.urlopen(base + '/') as response:
             assert b'PocketShare' in response.read()
+        assert (root / 'data/pocketshare.sqlite').is_file()
+        for route in ['/', '/manifest.webmanifest', '/sw.js']:
+            with urllib.request.urlopen(base + route) as response:
+                body = response.read().decode()
+                assert '__POCKETSHARE_PATH_PREFIX__' not in body
+                if prefix:
+                    assert prefix in body
         print('Binary smoke tests passed')
     finally:
         process.terminate()
