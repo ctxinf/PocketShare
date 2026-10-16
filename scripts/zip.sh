@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build myshare-server + share cli in release mode on this machine and
+# Build pocket-share-server + pshare cli in release mode on this machine and
 # package the binaries into a single zip that can be copied to another
 # machine (same OS/arch) and deployed there with the bundled deploy.sh,
 # without needing a rust toolchain on the target machine.
@@ -22,7 +22,7 @@ if ! (cd "$REPO_ROOT" && git diff --quiet HEAD 2>/dev/null); then
   GIT_COMMIT="${GIT_COMMIT}-dirty"
 fi
 
-PKG_NAME="myshare-${VERSION}"
+PKG_NAME="PocketShare-${VERSION}"
 DIST_DIR="$REPO_ROOT/dist"
 STAGE_DIR="$DIST_DIR/$PKG_NAME"
 
@@ -33,8 +33,8 @@ echo "==> building cli (release)"
 
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR/bin"
-cp "$REPO_ROOT/server/target/release/myshare-server" "$STAGE_DIR/bin/"
-cp "$REPO_ROOT/cli/target/release/share" "$STAGE_DIR/bin/"
+cp "$REPO_ROOT/server/target/release/pocket-share-server" "$STAGE_DIR/bin/"
+cp "$REPO_ROOT/cli/target/release/pshare" "$STAGE_DIR/bin/"
 # Ship the deploy script inside the package, so the target machine only needs
 # to unzip and run it -- no separate script to copy over.
 cp "$SCRIPT_DIR/deploy.sh" "$STAGE_DIR/deploy.sh"
@@ -87,4 +87,4 @@ echo "  unzip $PKG_NAME.zip && cd $PKG_NAME && ./deploy.sh"
 echo
 echo "监听地址 / 数据目录 / 路径前缀等在配置文件里改, 改完重启服务:"
 echo "  \$EDITOR ~/.config/myshare-server/config.toml"
-echo "  systemctl --user restart myshare-server"
+echo "  systemctl --user restart pocket-share-server"

@@ -18,12 +18,12 @@ fn config_path_display() -> String {
 fn usage() -> ! {
     eprintln!(
         "usage:
-  share login <api_key> [--server <url>]
-  share put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
-  share get <share_key> [<out_path>]
-  share get <share_key> --link
-  share delete <share_key>
-  share list
+  pshare login <api_key> [--server <url>]
+  pshare put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
+  pshare get <share_key> [<out_path>]
+  pshare get <share_key> --link
+  pshare delete <share_key>
+  pshare list
 
 config file: {}",
         config_path_display()
@@ -33,16 +33,16 @@ config file: {}",
 
 fn print_help() {
     println!(
-        "share - CLI for the personal CLI-Web share tool
+        "pshare - CLI for PocketShare
 
 usage:
-  share login <api_key> [--server <url>]   save server url + api_key
-  share put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
-  share get <share_key> [<out_path>]
-  share get <share_key> --link              mint a temporary token download link (no api_key needed to use it)
-  share delete <share_key>
-  share list
-  share help | -h | --help
+  pshare login <api_key> [--server <url>]   save server url + api_key
+  pshare put [<share_key>] [<file_path>|<text>] [--ttl <secs>] [--private]
+  pshare get <share_key> [<out_path>]
+  pshare get <share_key> --link              mint a temporary token download link (no api_key needed to use it)
+  pshare delete <share_key>
+  pshare list
+  pshare help | -h | --help
 
 config file: {}",
         config_path_display()

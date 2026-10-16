@@ -536,7 +536,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "myshare-server"
+name = "pocket-share-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",

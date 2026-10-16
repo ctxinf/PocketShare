@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Deploy a package built by zip.sh: installs the myshare-server binary as a
-# systemd --user service and the share cli binary. Does NOT need a rust
+# Deploy a package built by zip.sh: installs the pocket-share-server binary as a
+# systemd --user service and the pshare cli binary. Does NOT need a rust
 # toolchain (binaries are already built).
 #
 # This file is what zip.sh ships inside the package as `deploy.sh`, so it runs
@@ -8,7 +8,7 @@
 #
 # Two ways to run it:
 #   1. Inside an already-unzipped package dir:  ./deploy.sh
-#   2. Against a zip file from anywhere:        ./deploy.sh myshare-<version>.zip
+#   2. Against a zip file from anywhere:        ./deploy.sh PocketShare-<version>.zip
 #
 # All runtime settings (listen address, data dir, path prefix, limits) live in
 # the config file, not in this script. The server creates it with documented
@@ -22,16 +22,16 @@ CONFIG_FILE="${MYSHARE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/myshare-server/
 
 ZIP_FILE="${1:-}"
 
-if [ -z "$ZIP_FILE" ] && [ -f "$SCRIPT_DIR/bin/myshare-server" ]; then
+if [ -z "$ZIP_FILE" ] && [ -f "$SCRIPT_DIR/bin/pocket-share-server" ]; then
   # Case 1: we're sitting inside an unzipped package, deploy in place.
   PKG_DIR="$SCRIPT_DIR"
 else
   # Case 2: locate and unzip a package file.
   if [ -z "$ZIP_FILE" ]; then
-    ZIP_FILE=$(ls ./myshare-*.zip 2>/dev/null | head -n1 || true)
+    ZIP_FILE=$(ls ./PocketShare-*.zip 2>/dev/null | head -n1 || true)
   fi
   if [ -z "$ZIP_FILE" ] || [ ! -f "$ZIP_FILE" ]; then
-    echo "usage: $0 [myshare-*.zip]" >&2
+    echo "usage: $0 [PocketShare-*.zip]" >&2
     echo "  (或者在解压后的包目录里直接运行 ./deploy.sh)" >&2
     exit 1
   fi
@@ -42,40 +42,45 @@ else
   echo "==> unzip $ZIP_FILE"
   unzip -q "$ZIP_FILE" -d "$WORK_DIR"
   PKG_DIR=$(find "$WORK_DIR" -mindepth 1 -maxdepth 1 -type d | head -n1)
-  if [ -z "$PKG_DIR" ] || [ ! -f "$PKG_DIR/bin/myshare-server" ]; then
-    echo "error: $ZIP_FILE 里没找到 bin/myshare-server, 是不是不是 zip.sh 打的包?" >&2
+  if [ -z "$PKG_DIR" ] || [ ! -f "$PKG_DIR/bin/pocket-share-server" ]; then
+    echo "error: $ZIP_FILE 里没找到 bin/pocket-share-server, 是不是不是 zip.sh 打的包?" >&2
     exit 1
   fi
+fi
+
+# Retire the previous service name before starting the renamed service.
+if [ -f "$HOME/.config/systemd/user/myshare-server.service" ]; then
+  systemctl --user disable --now myshare-server.service
 fi
 
 # When re-deploying over an existing install, the old server is still running
 # and holding the binary + sqlite db open. Stop it before overwriting, so an
 # upgrade is a clean stop -> replace -> start rather than a live swap.
-if systemctl --user list-unit-files myshare-server.service >/dev/null 2>&1 &&
-   systemctl --user is-active --quiet myshare-server.service; then
-  echo "==> stopping running myshare-server before update"
-  systemctl --user stop myshare-server.service
+if systemctl --user list-unit-files pocket-share-server.service >/dev/null 2>&1 &&
+   systemctl --user is-active --quiet pocket-share-server.service; then
+  echo "==> stopping running pocket-share-server before update"
+  systemctl --user stop pocket-share-server.service
 fi
 
 mkdir -p "$INSTALL_BIN_DIR"
-cp "$PKG_DIR/bin/myshare-server" "$INSTALL_BIN_DIR/myshare-server"
-cp "$PKG_DIR/bin/share" "$INSTALL_BIN_DIR/share"
-chmod +x "$INSTALL_BIN_DIR/myshare-server" "$INSTALL_BIN_DIR/share"
+cp "$PKG_DIR/bin/pocket-share-server" "$INSTALL_BIN_DIR/pocket-share-server"
+cp "$PKG_DIR/bin/pshare" "$INSTALL_BIN_DIR/pshare"
+chmod +x "$INSTALL_BIN_DIR/pocket-share-server" "$INSTALL_BIN_DIR/pshare"
 echo "==> installed binaries to $INSTALL_BIN_DIR"
 
 mkdir -p "$(dirname "$CONFIG_FILE")"
 
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 mkdir -p "$SYSTEMD_USER_DIR"
-UNIT_FILE="$SYSTEMD_USER_DIR/myshare-server.service"
+UNIT_FILE="$SYSTEMD_USER_DIR/pocket-share-server.service"
 
 cat > "$UNIT_FILE" <<EOF
 [Unit]
-Description=myshare CLI-Web tool server
+Description=PocketShare server
 After=network.target
 
 [Service]
-ExecStart=$INSTALL_BIN_DIR/myshare-server --config $CONFIG_FILE
+ExecStart=$INSTALL_BIN_DIR/pocket-share-server --config $CONFIG_FILE
 Restart=on-failure
 RestartSec=2
 
@@ -86,16 +91,16 @@ EOF
 echo "==> wrote systemd user unit to $UNIT_FILE"
 
 systemctl --user daemon-reload
-systemctl --user enable --now myshare-server.service
+systemctl --user enable --now pocket-share-server.service
 
 echo "==> waiting for service to come up..."
 sleep 1
-systemctl --user status myshare-server.service --no-pager || true
+systemctl --user status pocket-share-server.service --no-pager || true
 
 echo
 echo "config file: $CONFIG_FILE"
 echo "  监听地址 / 数据目录 / 路径前缀等都在这个文件里改, 改完执行:"
-echo "  systemctl --user restart myshare-server"
+echo "  systemctl --user restart pocket-share-server"
 
 # Read back what the server actually resolved, so the printed api_key path and
 # URL match a config the user may already have customized.
@@ -128,6 +133,6 @@ case ":$PATH:" in
 esac
 
 echo
-echo "next: share login <api_key> --server http://<this-host>:${LISTEN_ADDR##*:}${PATH_PREFIX}"
+echo "next: pshare login <api_key> --server http://<this-host>:${LISTEN_ADDR##*:}${PATH_PREFIX}"
 echo
 echo "更多用法见同目录下的 usage.md"

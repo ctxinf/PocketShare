@@ -1,4 +1,4 @@
-/* myshare service worker.
+/* PocketShare service worker.
  *
  * Scope is the app root, which may be mounted under a path prefix; the server
  * substitutes the placeholder below before serving this file.
@@ -17,7 +17,7 @@ const PREFIX = (function () {
 })();
 
 // Bumping this drops every previously cached shell copy on activate.
-const CACHE = "myshare-shell-v1";
+const CACHE = "pocketshare-shell-v2";
 
 const SHELL_URL = PREFIX + "/";
 const PRECACHE = [SHELL_URL, PREFIX + "/manifest.webmanifest", PREFIX + "/icon.svg"];

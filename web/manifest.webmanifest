@@ -1,6 +1,6 @@
 {
-  "name": "Share",
-  "short_name": "Share",
+  "name": "PocketShare",
+  "short_name": "PocketShare",
   "description": "文本 / 文件 / 剪贴板 快速共享",
   "lang": "zh-CN",
   "start_url": "__MYSHARE_PATH_PREFIX__/",

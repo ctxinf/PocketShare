@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 /// else is configured through that file so it can be edited and picked up by
 /// a plain service restart.
 #[derive(Parser, Debug, Clone)]
-#[command(about = "myshare server. all settings live in the config file (see --config).")]
+#[command(about = "PocketShare server. all settings live in the config file (see --config).")]
 pub struct Args {
     /// Path to the TOML config file. Created with defaults on first run.
     #[arg(long, default_value_os_t = default_config_path())]
@@ -81,10 +81,10 @@ pub fn normalize_path_prefix(raw: &str) -> String {
 /// serializing `Settings`) so the file the user edits explains each field.
 fn config_template(settings: &Settings) -> String {
     format!(
-        r#"# myshare-server 配置文件
+        r#"# PocketShare 配置文件
 #
 # 改完这个文件后重启服务即可生效:
-#   systemctl --user restart myshare-server
+#   systemctl --user restart pocket-share-server
 
 # 监听地址。默认只监听本机;要让局域网/公网访问,改成 "0.0.0.0:3000",
 # 并务必配合防火墙或反向代理 + HTTPS。

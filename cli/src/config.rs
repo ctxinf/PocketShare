@@ -21,7 +21,7 @@ impl Config {
         let path = config_path()?;
         let data = std::fs::read_to_string(&path).with_context(|| {
             format!(
-                "not logged in yet (no config at {}). run `share login <api_key> [--server <url>]` first",
+                "not logged in yet (no config at {}). run `pshare login <api_key> [--server <url>]` first",
                 path.display()
             )
         })?;
