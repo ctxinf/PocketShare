@@ -7,9 +7,10 @@
 
 - Plain HTTP with a simple C/S architecture, straightforward interactions and broad compatibility.
 - Web client: simple, works across devices, with mobile layouts and PWA support.
-- CLI client: convenient terminal access, also usable by agents.
+- CLI client: share and download files directly from the terminal, with easy access for agents too.
 - Built with Rust, with low resource usage: server **5.1 MB**, CLI **4.1 MB**, idle server memory approximately **7 MiB**.
 - Simple to use: API Key authentication only, with no accounts or user management.
+- Other details: SQLite for data, filesystem storage for files, automatic cleanup and expiration.
 
 
 ## Contents
