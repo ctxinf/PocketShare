@@ -1,0 +1,13 @@
+services:
+  pocketshare:
+    image: ghcr.io/ctxinf/my-own-share:latest
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - pocketshare-data:/data
+    restart: unless-stopped
+volumes:
+  pocketshare-data:

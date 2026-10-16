@@ -3,13 +3,13 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT="$SCRIPT_DIR/.."
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI_DIR="$REPO_ROOT/cli"
 
 INSTALL_BIN_DIR="${INSTALL_BIN_DIR:-$HOME/.local/bin}"
 
 echo "==> building cli (release)"
-(cd "$CLI_DIR" && cargo build --release)
+(cd "$CLI_DIR" && cargo build --release --locked)
 
 mkdir -p "$INSTALL_BIN_DIR"
 cp "$CLI_DIR/target/release/pshare" "$INSTALL_BIN_DIR/pshare"

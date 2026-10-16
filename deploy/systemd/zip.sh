@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT="$SCRIPT_DIR/.."
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Version comes from the server crate, so a package is traceable back to the
 # source it was built from. Build metadata (timestamp / git commit) goes into
@@ -27,9 +27,9 @@ DIST_DIR="$REPO_ROOT/dist"
 STAGE_DIR="$DIST_DIR/$PKG_NAME"
 
 echo "==> building server (release)"
-(cd "$REPO_ROOT/server" && cargo build --release)
+(cd "$REPO_ROOT/server" && cargo build --release --locked)
 echo "==> building cli (release)"
-(cd "$REPO_ROOT/cli" && cargo build --release)
+(cd "$REPO_ROOT/cli" && cargo build --release --locked)
 
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR/bin"
