@@ -37,8 +37,34 @@ jobs:
         with:
           context: .
           file: deploy/docker/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          load: true
+          push: false
+          tags: pocketshare:ci
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Smoke test container
+        run: |
+          docker run -d --name pocketshare-ci pocketshare:ci
+          trap 'docker logs pocketshare-ci; docker rm -fv pocketshare-ci' EXIT
+          for attempt in $(seq 1 30); do
+            if docker exec pocketshare-ci curl -fsS http://127.0.0.1:3000/health; then break; fi
+            sleep 1
+          done
+          docker exec pocketshare-ci sh -ec '
+            curl -fsS http://127.0.0.1:3000/health
+            export XDG_CONFIG_HOME=/tmp/pshare-ci
+            pshare login "$(cat /data/api_key)"
+            key=$(pshare put "container smoke test")
+            test "$(pshare get "$key")" = "container smoke test"
+            pshare delete "$key"
+          '
+      - uses: docker/build-push-action@v6
+        if: github.event_name != 'pull_request'
+        with:
+          context: .
+          file: deploy/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

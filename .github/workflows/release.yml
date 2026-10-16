@@ -1,0 +1,76 @@
+name: Binaries
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: macos-15
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and test
+        shell: bash
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo test --locked --manifest-path server/Cargo.toml
+          cargo test --locked --manifest-path cli/Cargo.toml
+          cargo build --release --locked --target ${{ matrix.target }} --manifest-path server/Cargo.toml
+          cargo build --release --locked --target ${{ matrix.target }} --manifest-path cli/Cargo.toml
+          ext=''
+          if [ "$RUNNER_OS" = Windows ]; then ext='.exe'; fi
+          mkdir -p package/bin
+          cp server/target/${{ matrix.target }}/release/pocket-share-server$ext package/bin/
+          cp cli/target/${{ matrix.target }}/release/pshare$ext package/bin/
+          if [ "$RUNNER_OS" != Windows ]; then strip package/bin/*; fi
+          cp deploy/systemd/deploy.sh package/
+          python scripts/smoke.py package/bin/pocket-share-server$ext package/bin/pshare$ext
+      - name: Package tested binaries
+        shell: python
+        run: |
+          import hashlib, pathlib, shutil
+          name = 'PocketShare-${{ matrix.target }}'
+          kind = 'zip' if '${{ runner.os }}' == 'Windows' else 'gztar'
+          archive = pathlib.Path(shutil.make_archive(name, kind, 'package'))
+          archive.with_name(archive.name + '.sha256').write_text(hashlib.sha256(archive.read_bytes()).hexdigest() + '  ' + archive.name + '\n')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PocketShare-${{ matrix.target }}
+          path: PocketShare-*.*
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" || gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" artifacts/* --repo "$GITHUB_REPOSITORY" --clobber

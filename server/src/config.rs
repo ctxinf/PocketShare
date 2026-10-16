@@ -51,6 +51,7 @@ pub struct Config {
 fn config_home() -> PathBuf {
     std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
+        .or_else(|| std::env::var_os("APPDATA").map(PathBuf::from))
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".config")))
         .unwrap_or_else(|| PathBuf::from("."))
 }
@@ -60,8 +61,12 @@ fn default_config_path() -> PathBuf {
 }
 
 fn default_data_dir() -> PathBuf {
-    std::env::var_os("HOME")
-        .map(|h| PathBuf::from(h).join(".local/share/myshare-server"))
+    std::env::var_os("LOCALAPPDATA")
+        .map(|h| PathBuf::from(h).join("myshare-server"))
+        .or_else(|| {
+            std::env::var_os("HOME")
+                .map(|h| PathBuf::from(h).join(".local/share/myshare-server"))
+        })
         .unwrap_or_else(|| PathBuf::from("./data"))
 }
 
@@ -91,7 +96,7 @@ fn config_template(settings: &Settings) -> String {
 listen_addr = "{listen_addr}"
 
 # 数据目录:sqlite 数据库、上传的文件、api_key 都放在这里。
-data_dir = "{data_dir}"
+data_dir = {data_dir}
 
 # 路径前缀。留空表示挂在域名根路径下。
 # 如果这台机器上域名根路径已经被别的服务占用,可以填 "/myshare",
@@ -109,7 +114,7 @@ default_ttl_secs = {default_ttl_secs}
 cleanup_interval_secs = {cleanup_interval_secs}
 "#,
         listen_addr = settings.listen_addr,
-        data_dir = settings.data_dir.display(),
+        data_dir = toml::Value::String(settings.data_dir.to_string_lossy().into_owned()),
         path_prefix = settings.path_prefix,
         max_file_bytes = settings.max_file_bytes,
         default_ttl_secs = settings.default_ttl_secs,
@@ -164,4 +169,19 @@ fn load_or_create_api_key(data_dir: &Path) -> anyhow::Result<String> {
     };
     fs::write(&key_path, &key)?;
     Ok(key)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generated_config_round_trips_windows_paths() {
+        let settings = Settings {
+            data_dir: PathBuf::from(r"C:\Users\test\AppData\Local\myshare-server"),
+            ..Settings::default()
+        };
+        let parsed: Settings = toml::from_str(&config_template(&settings)).unwrap();
+        assert_eq!(parsed.data_dir, settings.data_dir);
+    }
 }

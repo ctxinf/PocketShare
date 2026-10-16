@@ -1,54 +1,72 @@
-# PocketShare
+<h1 align="center"><img src="web/icon.svg" width="36" height="36" alt=""> PocketShare</h1>
+<p align="center">中文 · <a href="README.en.md">English</a></p>
 
-面向个人自用的自托管多端分享工具。把文本、文件从终端发出去，在另一台电脑或手机上接收，走互联网也一样。
+面向个人自用的自托管多端分享工具，通过互联网分享文本和文件。
 
-- Rust 服务端，内嵌 Web 客户端与 PWA；另有 `pshare` CLI，支持管道、上传进度和重试。
-- 简单的 HTTP C/S 架构，无局域网发现；需要一台机器部署服务。
-- 无注册、无用户管理，仅 API Key 鉴权。支持分享码、过期清理和临时下载链接。
+- Rust 开发：Linux amd64 release + strip 实测，服务端 **5.1 MB**，CLI **4.1 MB**；服务空闲 RSS 约 **7 MiB**，上传时随文件大小增加。
+- 纯 HTTP C/S 架构，交互协议简单。
+- 内嵌 Web 客户端，保持简单、兼容性强，支持 PWA。
+- `pshare` CLI，终端 batteries included：管道、上传进度和重试。
+- 无登录注册、无用户管理，仅 API Key 鉴权。
 
-[LocalSend](https://localsend.org/) 面向局域网设备直传，[PocketChest](https://github.com/Hzao/PocketChest) 部署在 Cloudflare serverless；PocketShare 则在自己的机器上运行 HTTP 服务，供各端经互联网访问。
+## 1. 区分
 
-Linux amd64 实测（Rust 1.88，release + strip）：服务端 **5.1 MB**，CLI **4.1 MB**；容器内服务空闲 RSS 约 **7 MiB**，上传时随文件大小增加。
+- [LocalSend](https://localsend.org/)：局域网共享、自动发现设备；本项目通过互联网访问部署好的 HTTP 服务。
+- [PocketChest](https://github.com/Hzao/PocketChest)：serverless；本项目需要部署在自己的机器上。
 
-## 效果展示
+## 2. 安装
 
-![Web 客户端](docs/screenshots/02-share.png)
+### 1. Docker
 
-## 安装
+保存为 `compose.yml`：
 
-### Docker
-
-```bash
-git clone https://github.com/ctxinf/PocketShare.git
-cd PocketShare
-docker compose -f deploy/docker/compose.yaml up -d
-docker compose -f deploy/docker/compose.yaml exec pocketshare cat /data/api_key
+```yaml
+services:
+  pocketshare:
+    image: ghcr.io/ctxinf/pocketshare:latest
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - pocketshare-data:/data
+    restart: unless-stopped
+volumes:
+  pocketshare-data:
 ```
 
-打开 `http://localhost:3000`，填入 API Key。数据保存在 Docker volume 中。公网使用时，在前面配置 HTTPS 反向代理，指向 `127.0.0.1:3000`；PWA 安装需要 HTTPS 或 localhost。
-
-本地构建：
-
-```bash
-docker compose -f deploy/docker/compose.yaml up -d --build
+```sh
+docker compose up -d
+docker compose exec pocketshare cat /data/api_key
 ```
 
-自定义配置：修改 [config.toml](deploy/docker/config.toml)，在 Compose 的 `volumes` 中增加 `./config.toml:/etc/pocketshare/config.toml:ro`，然后重新创建容器。
+打开 `http://localhost:3000`，填入 API Key。数据保存在 volume 中。公网访问请配置 HTTPS 反向代理至 `127.0.0.1:3000`；PWA 安装需要 HTTPS 或 localhost。
 
-### 二进制 / systemd
+### 2. 二进制/systemd
 
-有 Rust 工具链时：
+#### 1. 通过脚本安装
 
-```bash
-./deploy/systemd/zip.sh
-unzip dist/PocketShare-0.1.0.zip
-cd PocketShare-0.1.0
-./deploy.sh
+Linux / macOS，无需 Rust；安装服务端和 CLI 到 `~/.local/bin`：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ctxinf/PocketShare/main/deploy/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+pocket-share-server
 ```
 
-打包产物也可拷贝到相同 OS / 架构的机器部署。详见 [systemd 部署说明](deploy/systemd/package-usage.md)。仅安装 CLI：`./deploy/systemd/install-cli.sh`。
+Linux 如需 systemd 后台运行，停止前台服务后执行：
 
-## 使用
+```sh
+bash ~/.local/bin/pocketshare-systemd/deploy.sh
+```
+
+可用 `VERSION=v0.1.0` 指定版本（下载脚本后执行 `VERSION=v0.1.0 sh install.sh`）。
+
+#### 2. 直接下载安装
+
+从 [Releases](https://github.com/ctxinf/PocketShare/releases/latest) 下载对应系统和架构的压缩包，解压后运行 `bin/pocket-share-server`（Windows 为 `.exe`）；CLI 为 `bin/pshare`。Linux 也可执行 `bash deploy.sh` 安装 systemd 用户服务。
+
+首次运行自动生成配置与 API Key，位置见启动日志。修改配置后重启即可。systemd 细节见 [部署说明](deploy/systemd/package-usage.md)。
+
+## 3. 使用
 
 <details>
 <summary>1. 打开网页，在设置中填入 API Key</summary>
@@ -86,7 +104,9 @@ cd PocketShare-0.1.0
 
 </details>
 
-终端：
+<details>
+<summary>5. 在终端中也可以进行分享和获取</summary>
+
 
 ```bash
 pshare login <API_KEY> --server https://share.example.com
@@ -98,3 +118,5 @@ pshare get <分享码> --link
 pshare list
 pshare delete <分享码>
 ```
+
+</details>

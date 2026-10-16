@@ -22,3 +22,7 @@ dist/
 
 # Local documentation
 /.doc/
+
+# Python verification artifacts
+__pycache__/
+screenshots/
