@@ -1,6 +1,6 @@
 services:
   pocketshare:
-    image: ghcr.io/ctxinf/my-own-share:latest
+    image: ghcr.io/ctxinf/pocketshare:latest
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile

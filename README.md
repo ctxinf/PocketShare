@@ -19,8 +19,8 @@ Linux amd64 实测（Rust 1.88，release + strip）：服务端 **5.1 MB**，CLI
 ### Docker
 
 ```bash
-git clone https://github.com/ctxinf/my-own-share.git
-cd my-own-share
+git clone https://github.com/ctxinf/PocketShare.git
+cd PocketShare
 docker compose -f deploy/docker/compose.yaml up -d
 docker compose -f deploy/docker/compose.yaml exec pocketshare cat /data/api_key
 ```
