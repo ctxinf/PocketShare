@@ -36,6 +36,19 @@ const PATH_PREFIX_PLACEHOLDER: &str = "__POCKETSHARE_PATH_PREFIX__";
 const ICON_CACHE_CONTROL: &str = "public, max-age=604800";
 const NO_CACHE: &str = "no-cache";
 
+// Serialize the request value as JSON so it cannot escape the inline script.
+fn index_response(index_html: &str, headers: &axum::http::HeaderMap) -> Response {
+    let language = headers.get(header::ACCEPT_LANGUAGE)
+        .and_then(|value| value.to_str().ok()).unwrap_or("");
+    let language_json = serde_json::to_string(language).unwrap()
+        .replace('<', "\\u003c").replace('>', "\\u003e").replace('&', "\\u0026");
+    let html = index_html.replace("\"__POCKETSHARE_ACCEPT_LANGUAGE__\"", &language_json);
+    (
+        [(header::CACHE_CONTROL, NO_CACHE), (header::VARY, "Accept-Language")],
+        Html(html),
+    ).into_response()
+}
+
 fn static_response(
     content_type: &'static str,
     cache_control: &'static str,
@@ -146,17 +159,13 @@ async fn main() -> anyhow::Result<()> {
 
     // The shell must be revalidated on every load, otherwise a redeployed UI
     // stays invisible behind the browser's HTTP cache until it expires.
-    let index_response = move || async move {
-        (
-            [(header::CACHE_CONTROL, NO_CACHE)],
-            Html(index_html),
-        )
-            .into_response()
+    let serve_index = move |headers: axum::http::HeaderMap| async move {
+        index_response(index_html, &headers)
     };
 
     let app = Router::new()
         .route("/health", get(|| async { "ok" }))
-        .route("/", get(index_response))
+        .route("/", get(serve_index))
         .route("/dl/:share_key", get(handlers::download::download))
         .merge(pwa_routes(manifest_json, service_worker_js))
         .merge(protected)
@@ -171,11 +180,11 @@ async fn main() -> anyhow::Result<()> {
         app
     } else {
         let slash_path = format!("{prefix}/");
-        Router::new().nest(&prefix, app).fallback(move |uri: axum::http::Uri| {
+        Router::new().nest(&prefix, app).fallback(move |uri: axum::http::Uri, headers: axum::http::HeaderMap| {
             let slash_path = slash_path.clone();
             async move {
                 if uri.path() == slash_path {
-                    ([(header::CACHE_CONTROL, NO_CACHE)], Html(index_html)).into_response()
+                    index_response(index_html, &headers)
                 } else {
                     (axum::http::StatusCode::NOT_FOUND, "not found").into_response()
                 }
@@ -192,4 +201,25 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod i18n_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn request_language_is_injected_safely_and_varies_cache() {
+        let mut headers = axum::http::HeaderMap::new();
+        let language = "fr-CA,zh-TW;q=0.8,</script><script>alert(1)</script>";
+        headers.insert(header::ACCEPT_LANGUAGE, language.parse().unwrap());
+        let response = index_response(INDEX_HTML, &headers);
+        assert_eq!(response.headers()[header::VARY], "Accept-Language");
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let html = std::str::from_utf8(&body).unwrap();
+        assert!(!html.contains("__POCKETSHARE_ACCEPT_LANGUAGE__"));
+        let json = html.split("const requestLanguages = ").nth(1).unwrap()
+            .split(";\n").next().unwrap();
+        assert!(!json.contains("</script>"));
+        assert_eq!(serde_json::from_str::<String>(json).unwrap(), language);
+    }
 }

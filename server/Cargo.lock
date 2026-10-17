@@ -536,24 +536,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pocket-share-server"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "axum",
- "clap",
- "rand",
- "rusqlite",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "toml",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "nu-ansi-term"
 version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -614,6 +596,24 @@ name = "pkg-config"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
+
+[[package]]
+name = "pocket-share-server"
+version = "0.2.1"
+dependencies = [
+ "anyhow",
+ "axum",
+ "clap",
+ "rand",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "ppv-lite86"

@@ -160,6 +160,9 @@
 
   /* ---------- Unified Top Header Row ---------- */
   .top-header {
+    /* Keep the header's backdrop-filter stacking context above the panels. */
+    position: relative;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1079,6 +1082,12 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+  .nav-actions { flex-shrink: 0; }
+  @media (max-width: 480px) { .top-header { flex-wrap: wrap; } .tabs-segment { min-width: 100%; } .nav-actions { margin-left: auto; border-left: 0; } }
+  .language-control { position: relative; }
+  .language-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; min-width: 160px; padding: 6px; border-radius: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: 0 8px 24px #0003; }
+  .language-menu button { display: block; width: 100%; border: 0; background: transparent; color: inherit; text-align: left; padding: 9px 12px; border-radius: 6px; cursor: pointer; }
+  .language-menu button:hover, .language-menu button[aria-pressed="true"] { background: var(--accent, #007aff); color: white; }
 </style>
 </head>
 <body>
@@ -1087,15 +1096,21 @@
   <!-- Top Header Row (Tabs + Theme Toggle + Settings) -->
   <header class="top-header">
     <nav class="tabs-segment" role="tablist">
-      <button class="tab-btn active" data-tab="put" role="tab" id="tabPut">分享</button>
-      <button class="tab-btn" data-tab="get" role="tab" id="tabGet">接收</button>
-      <button class="tab-btn" data-tab="list" role="tab" id="tabList">列表</button>
+      <button class="tab-btn active" data-tab="put" role="tab" id="tabPut"><span data-i18n="分享">分享</span></button>
+      <button class="tab-btn" data-tab="get" role="tab" id="tabGet"><span data-i18n="接收">接收</span></button>
+      <button class="tab-btn" data-tab="list" role="tab" id="tabList"><span data-i18n="列表">列表</span></button>
     </nav>
     <div class="nav-actions">
-      <button class="icon-btn" id="themeBtn" title="切换外观主题 (自动/亮色/暗色)" aria-label="切换外观主题">
+      <button class="icon-btn" id="themeBtn" title="切换外观主题" data-i18n-title="切换外观主题" aria-label="切换外观主题" data-i18n-aria-label="切换外观主题">
         <!-- SVG will be updated via JS -->
       </button>
-      <button class="icon-btn" id="openSettings" title="服务器设置" aria-label="服务器设置">
+      <div class="language-control">
+        <button class="icon-btn" id="languageBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="languageMenu" data-i18n-title="语言" data-i18n-aria-label="语言">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18z"/></svg>
+        </button>
+        <div id="languageMenu" class="language-menu" hidden></div>
+      </div>
+      <button class="icon-btn" id="openSettings" title="服务器设置" data-i18n-title="服务器设置" aria-label="服务器设置" data-i18n-aria-label="服务器设置">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -1116,43 +1131,43 @@
       <!-- Mutually Exclusive Sub Tabs: Text vs File -->
       <div class="sub-segment" role="tablist">
         <button class="sub-seg-btn active" id="btnTypeTxt" data-put-type="text" role="tab">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span data-i18n="文本分享">
           文本分享
-        </button>
+        </span></button>
         <button class="sub-seg-btn" id="btnTypeFile" data-put-type="file" role="tab">
-          <svg viewBox="0 0 24 24"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2A8 8 0 0 0 4.1 13 4 4 0 0 0 5 20h14a4 4 0 0 0 2.2-.6"></path><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg>
+          <svg viewBox="0 0 24 24"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2A8 8 0 0 0 4.1 13 4 4 0 0 0 5 20h14a4 4 0 0 0 2.2-.6"></path><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line></svg><span data-i18n="文件分享">
           文件分享
-        </button>
+        </span></button>
       </div>
 
       <!-- Text Sub-panel -->
       <div class="sub-panel active" id="putSub-text">
         <div class="form-group">
-          <label class="field-label" for="putText">文本内容</label>
-          <textarea id="putText" placeholder="在此输入或粘贴需要分享的文本内容..."></textarea>
+          <label class="field-label" for="putText"><span data-i18n="文本内容">文本内容</span></label>
+          <textarea id="putText" placeholder="在此输入或粘贴需要分享的文本内容..." data-i18n-placeholder="在此输入或粘贴需要分享的文本内容..."></textarea>
         </div>
         <div class="btn-row">
           <button class="btn-secondary btn-sm" id="pasteBtn" type="button">
-            <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg><span data-i18n="从剪贴板粘贴">
             从剪贴板粘贴
-          </button>
+          </span></button>
           <button class="btn-secondary btn-sm" id="clearTextBtn" type="button">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span data-i18n="清空">
             清空
-          </button>
+          </span></button>
         </div>
       </div>
 
       <!-- File Sub-panel -->
       <div class="sub-panel" id="putSub-file">
         <div class="form-group">
-          <label class="field-label">选择或拖入文件</label>
+          <label class="field-label"><span data-i18n="选择或拖入文件">选择或拖入文件</span></label>
           <div class="dropzone" id="dropzone">
             <div class="dropzone-icon">
               <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </div>
-            <div class="dropzone-title">点击选择文件 或 拖拽文件到此处</div>
-            <div class="dropzone-desc">支持任意格式文件上传</div>
+            <div class="dropzone-title"><span data-i18n="点击选择文件 或 拖拽文件到此处">点击选择文件 或 拖拽文件到此处</span></div>
+            <div class="dropzone-desc"><span data-i18n="支持任意格式文件上传">支持任意格式文件上传</span></div>
           </div>
 
           <div class="file-preview" id="filePreview" style="display:none;">
@@ -1165,7 +1180,7 @@
                 <div class="file-size" id="fileSize"></div>
               </div>
             </div>
-            <button class="btn-icon-subtle" id="removeFileBtn" title="移除选中的文件">
+            <button class="btn-icon-subtle" id="removeFileBtn" title="移除选中的文件" data-i18n-title="移除选中的文件">
               <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>
@@ -1174,31 +1189,31 @@
 
       <!-- Options (Accordion) -->
       <button class="options-toggle" id="optionsToggle" type="button">
-        <span>高级选项 (自定义 key / 有效期 / 隐私)</span>
+        <span><span data-i18n="高级选项 (自定义 key / 有效期 / 隐私)">高级选项 (自定义 key / 有效期 / 隐私)</span></span>
         <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
 
       <div class="options-content" id="optionsContent">
         <div class="form-group">
           <label class="field-label" for="putKey">
-            <span>自定义 Share Key</span>
-            <span class="label-hint">留空自动生成</span>
+            <span><span data-i18n="自定义 Share Key">自定义 Share Key</span></span>
+            <span class="label-hint"><span data-i18n="留空自动生成">留空自动生成</span></span>
           </label>
-          <input type="text" id="putKey" placeholder="例如: 123 或 my-doc" autocomplete="off">
+          <input type="text" id="putKey" placeholder="例如: 123 或 my-doc" data-i18n-placeholder="例如: 123 或 my-doc" autocomplete="off">
         </div>
 
         <div class="form-group">
           <label class="field-label" for="ttl">
-            <span>有效期 (秒)</span>
-            <span class="label-hint">默认 3600 秒 (1小时)</span>
+            <span><span data-i18n="有效期 (秒)">有效期 (秒)</span></span>
+            <span class="label-hint"><span data-i18n="默认 3600 秒 (1小时)">默认 3600 秒 (1小时)</span></span>
           </label>
           <input type="number" id="ttl" placeholder="3600" min="1">
         </div>
 
         <label class="switch-row" for="isPrivate">
           <div class="switch-row-left">
-            <span class="switch-title">不公开分享</span>
-            <span class="switch-desc">开启后不会出现在公共列表中</span>
+            <span class="switch-title"><span data-i18n="不公开分享">不公开分享</span></span>
+            <span class="switch-desc"><span data-i18n="开启后不会出现在公共列表中">开启后不会出现在公共列表中</span></span>
           </div>
           <div class="apple-switch">
             <input type="checkbox" id="isPrivate">
@@ -1210,7 +1225,7 @@
       <!-- Submit Action -->
       <button class="btn-primary" id="putBtn" type="button">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-        <span id="putBtnText">立即分享</span>
+        <span id="putBtnText"><span data-i18n="立即分享">立即分享</span></span>
       </button>
     </div>
   </main>
@@ -1220,11 +1235,11 @@
     <div class="card">
       <div class="form-group">
         <label class="field-label" for="getKey">Share Key</label>
-        <input type="text" id="getKey" placeholder="输入 share_key (例如 123)" autocomplete="off">
+        <input type="text" id="getKey" placeholder="输入 share_key (例如 123)" data-i18n-placeholder="输入 share_key (例如 123)" autocomplete="off">
       </div>
       <button class="btn-primary" id="getBtn" type="button">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        <span>获取内容</span>
+        <span><span data-i18n="获取内容">获取内容</span></span>
       </button>
 
       <div id="getContentResult" class="get-result-card" style="display:none;"></div>
@@ -1235,11 +1250,11 @@
   <main class="panel" id="panel-list">
     <div class="card">
       <div class="list-header">
-        <span class="list-title">公开分享列表</span>
+        <span class="list-title"><span data-i18n="公开分享列表">公开分享列表</span></span>
         <button class="btn-secondary btn-sm" id="refreshListBtn" type="button">
-          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span data-i18n="刷新">
           刷新
-        </button>
+        </span></button>
       </div>
       <div id="listBody" class="list-body"></div>
     </div>
@@ -1250,21 +1265,21 @@
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>服务器设置</h3>
-      <button class="btn-icon-subtle" id="closeSettingsBtn" aria-label="关闭">
+      <h3><span data-i18n="服务器设置">服务器设置</span></h3>
+      <button class="btn-icon-subtle" id="closeSettingsBtn" aria-label="关闭" data-i18n-aria-label="关闭">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="field-label" for="serverUrl">服务器地址</label>
-        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:3000 或 https://example.com/pocketshare">
+        <label class="field-label" for="serverUrl"><span data-i18n="服务器地址">服务器地址</span></label>
+        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:3000 或 https://example.com/pocketshare" data-i18n-placeholder="http://127.0.0.1:3000 或 https://example.com/pocketshare">
       </div>
       <div class="form-group">
         <label class="field-label" for="apiKey">API Key</label>
-        <input type="text" id="apiKey" placeholder="输入访问密钥 (api_key)">
+        <input type="text" id="apiKey" placeholder="输入访问密钥 (api_key)" data-i18n-placeholder="输入访问密钥 (api_key)">
       </div>
-      <button class="btn-primary" id="saveSettingsBtn" type="button">保存设置</button>
+      <button class="btn-primary" id="saveSettingsBtn" type="button"><span data-i18n="保存设置">保存设置</span></button>
     </div>
   </div>
 </div>
@@ -1286,6 +1301,152 @@
     const injected = "__POCKETSHARE_PATH_PREFIX__";
     return injected.indexOf("POCKETSHARE_PATH_PREFIX") !== -1 ? "" : injected;
   })();
+
+
+  // Language preference: explicit cookie > request header > browser > English.
+  const TRANSLATIONS = {
+    "分享": ["Share", "分享", "共有", "공유", "Partager", "Teilen", "Compartir"],
+    "接收": ["Receive", "接收", "受信", "받기", "Recevoir", "Empfangen", "Recibir"],
+    "列表": ["List", "列表", "一覧", "목록", "Liste", "Liste", "Lista"],
+    "文本分享": ["Share text", "文字分享", "テキスト共有", "텍스트 공유", "Partager du texte", "Text teilen", "Compartir texto"],
+    "文件分享": ["Share file", "檔案分享", "ファイル共有", "파일 공유", "Partager un fichier", "Datei teilen", "Compartir archivo"],
+    "文本内容": ["Text content", "文字內容", "テキスト", "텍스트 내용", "Texte", "Textinhalt", "Contenido de texto"],
+    "在此输入或粘贴需要分享的文本内容...": ["Type or paste text to share...", "在此輸入或貼上要分享的文字...", "共有するテキストを入力または貼り付け...", "공유할 텍스트를 입력하거나 붙여넣으세요...", "Saisissez ou collez le texte à partager...", "Text zum Teilen eingeben oder einfügen...", "Escribe o pega el texto para compartir..."],
+    "从剪贴板粘贴": ["Paste from clipboard", "從剪貼簿貼上", "クリップボードから貼り付け", "클립보드에서 붙여넣기", "Coller", "Aus Zwischenablage einfügen", "Pegar del portapapeles"],
+    "清空": ["Clear", "清空", "クリア", "지우기", "Effacer", "Leeren", "Limpiar"],
+    "选择或拖入文件": ["Select or drop a file", "選擇或拖入檔案", "ファイルを選択またはドロップ", "파일 선택 또는 끌어놓기", "Choisir ou déposer un fichier", "Datei auswählen oder ablegen", "Selecciona o arrastra un archivo"],
+    "点击选择文件 或 拖拽文件到此处": ["Click to choose or drop a file here", "點擊選擇檔案或拖曳至此", "クリックして選択、またはここにドロップ", "클릭하여 선택하거나 여기에 끌어놓으세요", "Cliquez ou déposez un fichier ici", "Klicken oder Datei hier ablegen", "Haz clic o arrastra un archivo aquí"],
+    "支持任意格式文件上传": ["Any file format supported", "支援任意格式檔案上傳", "すべての形式に対応", "모든 파일 형식 지원", "Tous les formats acceptés", "Alle Dateiformate unterstützt", "Se admite cualquier formato"],
+    "移除选中的文件": ["Remove selected file", "移除選取的檔案", "選択したファイルを削除", "선택한 파일 제거", "Retirer le fichier", "Datei entfernen", "Quitar archivo"],
+    "高级选项 (自定义 key / 有效期 / 隐私)": ["Advanced options (key / expiry / privacy)", "進階選項 (自訂 key / 有效期 / 隱私)", "詳細設定 (キー / 有効期限 / プライバシー)", "고급 옵션 (키 / 만료 / 공개 여부)", "Options avancées (clé / expiration / confidentialité)", "Erweiterte Optionen (Schlüssel / Ablauf / Privatsphäre)", "Opciones avanzadas (clave / caducidad / privacidad)"],
+    "自定义 Share Key": ["Custom Share Key", "自訂 Share Key", "カスタム Share Key", "사용자 지정 Share Key", "Share Key personnalisée", "Eigener Share Key", "Share Key personalizada"],
+    "留空自动生成": ["Leave blank to generate", "留空自動產生", "空欄で自動生成", "비워두면 자동 생성", "Vide pour générer", "Leer lassen für automatische Vergabe", "Deja vacío para generar"],
+    "例如: 123 或 my-doc": ["e.g. 123 or my-doc", "例如：123 或 my-doc", "例: 123 または my-doc", "예: 123 또는 my-doc", "Ex. : 123 ou my-doc", "Z. B. 123 oder my-doc", "Ej.: 123 o my-doc"],
+    "有效期 (秒)": ["Expiry (seconds)", "有效期 (秒)", "有効期限 (秒)", "유효 기간 (초)", "Expiration (secondes)", "Gültigkeit (Sekunden)", "Caducidad (segundos)"],
+    "默认 3600 秒 (1小时)": ["Default: 3600 seconds (1 hour)", "預設 3600 秒 (1小時)", "既定: 3600 秒 (1時間)", "기본값: 3600초 (1시간)", "Par défaut : 3600 s (1 h)", "Standard: 3600 Sekunden (1 Stunde)", "Por defecto: 3600 segundos (1 hora)"],
+    "不公开分享": ["Private share", "不公開分享", "非公開で共有", "비공개 공유", "Partage privé", "Privat teilen", "Compartir en privado"],
+    "开启后不会出现在公共列表中": ["Hide from the public list", "開啟後不會出現在公開列表中", "公開リストに表示しない", "공개 목록에서 숨기기", "Masquer de la liste publique", "Aus öffentlicher Liste ausblenden", "Ocultar de la lista pública"],
+    "立即分享": ["Share now", "立即分享", "今すぐ共有", "지금 공유", "Partager", "Jetzt teilen", "Compartir ahora"],
+    "输入 share_key (例如 123)": ["Enter share_key (e.g. 123)", "輸入 share_key (例如 123)", "share_key を入力 (例: 123)", "share_key 입력 (예: 123)", "Saisissez share_key (ex. : 123)", "share_key eingeben (z. B. 123)", "Introduce share_key (ej.: 123)"],
+    "获取内容": ["Get content", "取得內容", "内容を取得", "내용 가져오기", "Récupérer", "Inhalt abrufen", "Obtener contenido"],
+    "公开分享列表": ["Public shares", "公開分享列表", "公開共有リスト", "공개 공유 목록", "Partages publics", "Öffentliche Freigaben", "Contenido público"],
+    "刷新": ["Refresh", "重新整理", "更新", "새로고침", "Actualiser", "Aktualisieren", "Actualizar"],
+    "服务器设置": ["Server settings", "伺服器設定", "サーバー設定", "서버 설정", "Paramètres du serveur", "Servereinstellungen", "Configuración del servidor"],
+    "关闭": ["Close", "關閉", "閉じる", "닫기", "Fermer", "Schließen", "Cerrar"],
+    "服务器地址": ["Server URL", "伺服器位址", "サーバー URL", "서버 주소", "URL du serveur", "Serveradresse", "URL del servidor"],
+    "http://127.0.0.1:3000 或 https://example.com/pocketshare": ["http://127.0.0.1:3000 or https://example.com/pocketshare", "http://127.0.0.1:3000 或 https://example.com/pocketshare", "http://127.0.0.1:3000 または https://example.com/pocketshare", "http://127.0.0.1:3000 또는 https://example.com/pocketshare", "http://127.0.0.1:3000 ou https://example.com/pocketshare", "http://127.0.0.1:3000 oder https://example.com/pocketshare", "http://127.0.0.1:3000 o https://example.com/pocketshare"],
+    "输入访问密钥 (api_key)": ["Enter access key (api_key)", "輸入存取金鑰 (api_key)", "アクセスキーを入力 (api_key)", "접근 키 입력 (api_key)", "Clé d’accès (api_key)", "Zugriffsschlüssel (api_key)", "Clave de acceso (api_key)"],
+    "保存设置": ["Save settings", "儲存設定", "設定を保存", "설정 저장", "Enregistrer", "Einstellungen speichern", "Guardar ajustes"],
+    "切换外观主题": ["Change theme", "切換外觀主題", "テーマを変更", "테마 변경", "Changer de thème", "Design ändern", "Cambiar tema"],
+    "外观: 跟随系统 (点击切换为亮色)": ["Theme: system (switch to light)", "外觀：跟隨系統 (點擊切換亮色)", "テーマ: 自動 (ライトに切替)", "테마: 시스템 (밝게 전환)", "Thème : système (passer au clair)", "Design: System (zu hell wechseln)", "Tema: sistema (cambiar a claro)"],
+    "外观: 亮色模式 (点击切换为暗色)": ["Theme: light (switch to dark)", "外觀：亮色 (點擊切換暗色)", "テーマ: ライト (ダークに切替)", "테마: 밝게 (어둡게 전환)", "Thème : clair (passer au sombre)", "Design: Hell (zu dunkel wechseln)", "Tema: claro (cambiar a oscuro)"],
+    "外观: 暗色模式 (点击切换为跟随系统)": ["Theme: dark (switch to system)", "外觀：暗色 (點擊跟隨系統)", "テーマ: ダーク (自動に切替)", "테마: 어둡게 (시스템으로 전환)", "Thème : sombre (passer au système)", "Design: Dunkel (zu System wechseln)", "Tema: oscuro (cambiar a sistema)"],
+    "已切换至亮色模式": ["Light theme enabled", "已切換至亮色", "ライトに切り替えました", "밝은 테마 적용됨", "Thème clair activé", "Helles Design aktiviert", "Tema claro activado"],
+    "已切换至暗色模式": ["Dark theme enabled", "已切換至暗色", "ダークに切り替えました", "어두운 테마 적용됨", "Thème sombre activé", "Dunkles Design aktiviert", "Tema oscuro activado"],
+    "已设为跟随系统": ["Following system theme", "已設為跟隨系統", "システム設定に従います", "시스템 테마 적용됨", "Thème système activé", "Systemdesign aktiviert", "Tema del sistema activado"],
+    "设置已保存": ["Settings saved", "設定已儲存", "設定を保存しました", "설정 저장됨", "Paramètres enregistrés", "Einstellungen gespeichert", "Ajustes guardados"],
+    "服务器返回状态码 ": ["Server returned status ", "伺服器回傳狀態碼 ", "サーバーの応答コード ", "서버 응답 상태 ", "Statut du serveur ", "Serverstatus ", "Estado del servidor "],
+    "网络不佳，正在重试 (": ["Connection unstable, retrying (", "網路不穩，正在重試 (", "接続が不安定です。再試行 (", "연결 불안정, 재시도 중 (", "Connexion instable, nouvel essai (", "Verbindung instabil, neuer Versuch (", "Conexión inestable, reintentando ("],
+    "网络错误": ["Network error", "網路錯誤", "ネットワークエラー", "네트워크 오류", "Erreur réseau", "Netzwerkfehler", "Error de red"],
+    "请求超时": ["Request timed out", "請求逾時", "リクエストがタイムアウトしました", "요청 시간 초과", "Délai dépassé", "Zeitüberschreitung", "Tiempo de espera agotado"],
+    "上传已取消": ["Upload cancelled", "上傳已取消", "アップロードを中止しました", "업로드 취소됨", "Envoi annulé", "Upload abgebrochen", "Subida cancelada"],
+    "已从剪贴板粘贴": ["Pasted from clipboard", "已從剪貼簿貼上", "貼り付けました", "붙여넣기 완료", "Contenu collé", "Eingefügt", "Contenido pegado"],
+    "剪贴板读取失败": ["Cannot read clipboard", "剪貼簿讀取失敗", "クリップボードを読み取れません", "클립보드 읽기 실패", "Lecture du presse-papiers impossible", "Zwischenablage nicht lesbar", "No se pudo leer el portapapeles"],
+    "无法访问系统剪贴板: ": ["Cannot access clipboard: ", "無法存取系統剪貼簿：", "クリップボードにアクセスできません: ", "클립보드 접근 실패: ", "Accès au presse-papiers impossible : ", "Kein Zugriff auf Zwischenablage: ", "No se puede acceder al portapapeles: "],
+    "上传中": ["Uploading", "上傳中", "アップロード中", "업로드 중", "Envoi en cours", "Wird hochgeladen", "Subiendo"],
+    "等待服务器处理...": ["Waiting for server...", "等待伺服器處理...", "サーバーの処理を待っています...", "서버 처리 대기 중...", "Traitement du serveur...", "Warte auf Server...", "Esperando al servidor..."],
+    "提示": ["Notice", "提示", "お知らせ", "알림", "Information", "Hinweis", "Aviso"],
+    "请输入要分享的文本内容": ["Enter text to share", "請輸入要分享的文字", "共有するテキストを入力してください", "공유할 텍스트를 입력하세요", "Saisissez le texte à partager", "Text zum Teilen eingeben", "Introduce el texto para compartir"],
+    "请选择要分享的文件": ["Choose a file to share", "請選擇要分享的檔案", "共有するファイルを選んでください", "공유할 파일을 선택하세요", "Choisissez un fichier", "Datei zum Teilen auswählen", "Elige un archivo para compartir"],
+    "上传中...": ["Uploading...", "上傳中...", "アップロード中...", "업로드 중...", "Envoi en cours...", "Wird hochgeladen...", "Subiendo..."],
+    "网络重试中": ["Retrying connection", "網路重試中", "接続を再試行中", "연결 재시도 중", "Nouvelle tentative", "Neuer Verbindungsversuch", "Reintentando conexión"],
+    "分享成功！您的 Share Key 为：": ["Shared! Your Share Key is:", "分享成功！您的 Share Key 為：", "共有しました！Share Key:", "공유 완료! Share Key:", "Partagé ! Votre Share Key :", "Geteilt! Ihr Share Key:", "¡Compartido! Tu Share Key:"],
+    "复制 Share Key": ["Copy Share Key", "複製 Share Key", "Share Key をコピー", "Share Key 복사", "Copier Share Key", "Share Key kopieren", "Copiar Share Key"],
+    "前往接收": ["Go to receive", "前往接收", "受信に移動", "받기로 이동", "Aller à la réception", "Zum Empfang", "Ir a recibir"],
+    "分享成功": ["Shared successfully", "分享成功", "共有しました", "공유 완료", "Partage réussi", "Erfolgreich geteilt", "Compartido correctamente"],
+    "Share Key 已复制到剪贴板": ["Share Key copied", "Share Key 已複製到剪貼簿", "Share Key をコピーしました", "Share Key 복사됨", "Share Key copiée", "Share Key kopiert", "Share Key copiada"],
+    "复制失败，请手动选择复制": ["Copy failed; please copy manually", "複製失敗，請手動複製", "コピーできません。手動でコピーしてください", "복사 실패, 직접 복사하세요", "Échec de copie ; copiez manuellement", "Kopieren fehlgeschlagen; bitte manuell kopieren", "Error al copiar; copia manualmente"],
+    "分享失败": ["Sharing failed", "分享失敗", "共有に失敗しました", "공유 실패", "Échec du partage", "Teilen fehlgeschlagen", "Error al compartir"],
+    "错误信息: ": ["Error: ", "錯誤訊息：", "エラー: ", "오류: ", "Erreur : ", "Fehler: ", "Error: "],
+    "请输入 Share Key": ["Enter a Share Key", "請輸入 Share Key", "Share Key を入力してください", "Share Key를 입력하세요", "Saisissez une Share Key", "Share Key eingeben", "Introduce una Share Key"],
+    "获取中": ["Fetching", "取得中", "取得中", "가져오는 중", "Récupération", "Wird abgerufen", "Obteniendo"],
+    "正在从服务器检索数据...": ["Retrieving data from server...", "正在從伺服器擷取資料...", "サーバーからデータを取得中...", "서버에서 데이터 가져오는 중...", "Récupération des données...", "Daten werden vom Server abgerufen...", "Recuperando datos del servidor..."],
+    "获取到的文本内容": ["Received text", "取得的文字內容", "受信したテキスト", "받은 텍스트", "Texte reçu", "Empfangener Text", "Texto recibido"],
+    "复制文本内容": ["Copy text", "複製文字內容", "テキストをコピー", "텍스트 복사", "Copier le texte", "Text kopieren", "Copiar texto"],
+    "文本已复制到剪贴板": ["Text copied", "文字已複製到剪貼簿", "テキストをコピーしました", "텍스트 복사됨", "Texte copié", "Text kopiert", "Texto copiado"],
+    "复制失败": ["Copy failed", "複製失敗", "コピーに失敗しました", "복사 실패", "Échec de copie", "Kopieren fehlgeschlagen", "Error al copiar"],
+    "文件准备就绪": ["File ready", "檔案準備就緒", "ファイルの準備完了", "파일 준비 완료", "Fichier prêt", "Datei bereit", "Archivo listo"],
+    "下载文件": ["Download file", "下載檔案", "ファイルをダウンロード", "파일 다운로드", "Télécharger", "Datei herunterladen", "Descargar archivo"],
+    "已开始下载 ": ["Download started: ", "已開始下載 ", "ダウンロード開始: ", "다운로드 시작: ", "Téléchargement démarré : ", "Download gestartet: ", "Descarga iniciada: "],
+    "获取失败": ["Fetch failed", "取得失敗", "取得に失敗しました", "가져오기 실패", "Échec de récupération", "Abrufen fehlgeschlagen", "Error al obtener"],
+    "无法获取内容: ": ["Cannot fetch content: ", "無法取得內容：", "内容を取得できません: ", "내용을 가져올 수 없음: ", "Contenu indisponible : ", "Inhalt nicht abrufbar: ", "No se puede obtener el contenido: "],
+    "正在加载公开分享...": ["Loading public shares...", "正在載入公開分享...", "公開共有を読み込み中...", "공개 공유 불러오는 중...", "Chargement des partages...", "Öffentliche Freigaben werden geladen...", "Cargando contenido público..."],
+    "暂无公开分享记录": ["No public shares yet", "暫無公開分享記錄", "公開共有はありません", "공개 공유가 없습니다", "Aucun partage public", "Keine öffentlichen Freigaben", "No hay contenido público"],
+    "文件": ["File", "檔案", "ファイル", "파일", "Fichier", "Datei", "Archivo"],
+    "文本": ["Text", "文字", "テキスト", "텍스트", "Texte", "Text", "Texto"],
+    "获取": ["Get", "取得", "取得", "가져오기", "Récupérer", "Abrufen", "Obtener"],
+    "删除": ["Delete", "刪除", "削除", "삭제", "Supprimer", "Löschen", "Eliminar"],
+    "确认删除 Share Key [": ["Delete Share Key [", "確認刪除 Share Key [", "Share Key を削除 [", "Share Key 삭제 [", "Supprimer Share Key [", "Share Key löschen [", "Eliminar Share Key ["],
+    "] 吗？": ["]?", "] 嗎？", "]？", "]?", "] ?", "]?", "]?"],
+    "已删除 ": ["Deleted: ", "已刪除 ", "削除しました: ", "삭제됨: ", "Supprimé : ", "Gelöscht: ", "Eliminado: "],
+    "删除失败: ": ["Delete failed: ", "刪除失敗：", "削除に失敗しました: ", "삭제 실패: ", "Échec de suppression : ", "Löschen fehlgeschlagen: ", "Error al eliminar: "],
+    "加载失败: ": ["Loading failed: ", "載入失敗：", "読み込みに失敗しました: ", "불러오기 실패: ", "Échec du chargement : ", "Laden fehlgeschlagen: ", "Error al cargar: "],
+    "有新版本，正在更新…": ["New version available, updating…", "有新版本，正在更新…", "新しいバージョンに更新中…", "새 버전 업데이트 중…", "Nouvelle version, mise à jour…", "Neue Version wird geladen…", "Nueva versión, actualizando…"],
+    "语言": ["Language", "語言", "言語", "언어", "Langue", "Sprache", "Idioma"]
+  };
+  const LANGUAGES = {en: "English", zh: "简体中文", "zh-TW": "繁體中文", ja: "日本語", ko: "한국어", fr: "Français", de: "Deutsch", es: "Español"};
+  const LANGUAGE_COLUMNS = ["en", "zh-TW", "ja", "ko", "fr", "de", "es"];
+  function normalizeLanguage(value) {
+    const tag = String(value || "").toLowerCase().replace(/_/g, "-");
+    if (/^zh-(tw|hk|mo|hant)(-|$)/.test(tag)) return "zh-TW";
+    const base = tag.split("-")[0];
+    return ({jp: "ja", kr: "ko"})[base] || (Object.hasOwn(LANGUAGES, base) ? base : null);
+  }
+  const cookie = document.cookie.split(";").map(part => part.trim()).find(part => part.startsWith("share.lang="));
+  let savedLanguage;
+  try { savedLanguage = cookie && normalizeLanguage(decodeURIComponent(cookie.slice(11))); } catch (_) {}
+  const requestLanguages = "__POCKETSHARE_ACCEPT_LANGUAGE__";
+  const preferred = requestLanguages.startsWith("__POCKETSHARE_") ? [] : requestLanguages.split(",")
+    .map((entry, order) => {
+      const [tag, ...params] = entry.trim().split(";");
+      const quality = params.find(param => param.trim().startsWith("q="));
+      return { tag, order, q: quality ? Number(quality.trim().slice(2)) : 1 };
+    }).filter(entry => entry.q > 0 && entry.q <= 1).sort((a, b) => b.q - a.q || a.order - b.order).map(entry => entry.tag);
+  let language = savedLanguage || preferred.concat(navigator.languages || [navigator.language]).map(normalizeLanguage).find(Boolean) || "en";
+  function t(key) {
+    if (language === "zh") return key;
+    return TRANSLATIONS[key]?.[LANGUAGE_COLUMNS.indexOf(language)] || key;
+  }
+  function applyLanguage() {
+    document.documentElement.lang = language === "zh" ? "zh-CN" : language;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    ["title", "aria-label", "placeholder"].forEach(attr => {
+      document.querySelectorAll("[data-i18n-" + attr + "]").forEach(el => el.setAttribute(attr, t(el.getAttribute("data-i18n-" + attr))));
+    });
+  }
+  const languageBtn = document.getElementById("languageBtn");
+  const languageMenu = document.getElementById("languageMenu");
+  function closeLanguageMenu() { languageMenu.hidden = true; languageBtn.setAttribute("aria-expanded", "false"); }
+  Object.entries(LANGUAGES).forEach(([code, name]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = name;
+    button.lang = code;
+    button.setAttribute("aria-pressed", String(language === code));
+    button.addEventListener("click", () => {
+      document.cookie = "share.lang=" + encodeURIComponent(code) + "; Path=" + (PATH_PREFIX || "/") + "; Max-Age=31536000; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : "");
+      location.reload();
+    });
+    languageMenu.appendChild(button);
+  });
+  languageBtn.addEventListener("click", () => {
+    languageMenu.hidden = !languageMenu.hidden;
+    languageBtn.setAttribute("aria-expanded", String(!languageMenu.hidden));
+    if (!languageMenu.hidden) languageMenu.querySelector('[aria-pressed="true"]').focus();
+  });
+  document.addEventListener("click", event => { if (!event.target.closest(".language-control")) closeLanguageMenu(); });
+  document.addEventListener("keydown", event => { if (event.key === "Escape" && !languageMenu.hidden) { closeLanguageMenu(); languageBtn.focus(); } });
+  applyLanguage();
 
   function defaultServerUrl() { return window.location.origin + PATH_PREFIX; }
   function getServerUrl() { return localStorage.getItem(LS_SERVER) || defaultServerUrl(); }
@@ -1310,18 +1471,18 @@
     if (theme === "auto") {
       document.documentElement.removeAttribute("data-theme");
       themeBtn.innerHTML = ICONS.auto;
-      themeBtn.title = "外观: 跟随系统 (点击切换为亮色)";
+      themeBtn.title = t("外观: 跟随系统 (点击切换为亮色)");
       const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       metaThemeColor.setAttribute("content", isDark ? "#000000" : "#f4f5f8");
     } else if (theme === "light") {
       document.documentElement.setAttribute("data-theme", "light");
       themeBtn.innerHTML = ICONS.sun;
-      themeBtn.title = "外观: 亮色模式 (点击切换为暗色)";
+      themeBtn.title = t("外观: 亮色模式 (点击切换为暗色)");
       metaThemeColor.setAttribute("content", "#f4f5f8");
     } else {
       document.documentElement.setAttribute("data-theme", "dark");
       themeBtn.innerHTML = ICONS.moon;
-      themeBtn.title = "外观: 暗色模式 (点击切换为跟随系统)";
+      themeBtn.title = t("外观: 暗色模式 (点击切换为跟随系统)");
       metaThemeColor.setAttribute("content", "#000000");
     }
   }
@@ -1329,13 +1490,13 @@
   themeBtn.addEventListener("click", function () {
     if (currentTheme === "auto") {
       applyTheme("light");
-      showToast("已切换至亮色模式");
+      showToast(t("已切换至亮色模式"));
     } else if (currentTheme === "light") {
       applyTheme("dark");
-      showToast("已切换至暗色模式");
+      showToast(t("已切换至暗色模式"));
     } else {
       applyTheme("auto");
-      showToast("已设为跟随系统");
+      showToast(t("已设为跟随系统"));
     }
   });
 
@@ -1411,7 +1572,7 @@
     localStorage.setItem(LS_SERVER, url);
     localStorage.setItem(LS_KEY, key);
     closeSettings();
-    showToast("设置已保存");
+    showToast(t("设置已保存"));
   });
 
   if (!getApiKey()) {
@@ -1437,18 +1598,18 @@
         const resp = await fetch(url, options);
         if (!resp.ok) {
           if (resp.status >= 400 && resp.status < 500) {
-            const err = new Error("服务器返回状态码 " + resp.status);
+            const err = new Error(t("服务器返回状态码 ") + resp.status);
             err.nonRetryable = true;
             throw err;
           }
-          throw new Error("服务器返回状态码 " + resp.status);
+          throw new Error(t("服务器返回状态码 ") + resp.status);
         }
         return resp;
       } catch (e) {
         if (e.nonRetryable || attempt >= maxRetries) throw e;
         attempt++;
         const backoff = 300 * Math.pow(2, attempt);
-        if (onStatus) onStatus("网络不佳，正在重试 (" + attempt + "/" + maxRetries + ")...");
+        if (onStatus) onStatus(t("网络不佳，正在重试 (") + attempt + "/" + maxRetries + ")...");
         await sleep(backoff);
       }
     }
@@ -1478,16 +1639,16 @@
           resolve(xhr.responseText);
           return;
         }
-        const err = new Error("服务器返回状态码 " + xhr.status);
+        const err = new Error(t("服务器返回状态码 ") + xhr.status);
         // 4xx means the request itself is wrong (bad key, too large); resending
         // it unchanged would just fail again.
         if (xhr.status >= 400 && xhr.status < 500) err.nonRetryable = true;
         reject(err);
       });
-      xhr.addEventListener("error", function () { reject(new Error("网络错误")); });
-      xhr.addEventListener("timeout", function () { reject(new Error("请求超时")); });
+      xhr.addEventListener("error", function () { reject(new Error(t("网络错误"))); });
+      xhr.addEventListener("timeout", function () { reject(new Error(t("请求超时"))); });
       xhr.addEventListener("abort", function () {
-        const err = new Error("上传已取消");
+        const err = new Error(t("上传已取消"));
         err.nonRetryable = true;
         reject(err);
       });
@@ -1508,7 +1669,7 @@
         if (e.nonRetryable || attempt >= maxRetries) throw e;
         attempt++;
         const backoff = 300 * Math.pow(2, attempt);
-        if (onStatus) onStatus("网络不佳，正在重试 (" + attempt + "/" + maxRetries + ")...");
+        if (onStatus) onStatus(t("网络不佳，正在重试 (") + attempt + "/" + maxRetries + ")...");
         await sleep(backoff);
       }
     }
@@ -1619,9 +1780,9 @@
     try {
       const text = await navigator.clipboard.readText();
       document.getElementById("putText").value = text;
-      showToast("已从剪贴板粘贴");
+      showToast(t("已从剪贴板粘贴"));
     } catch (e) {
-      showTopNotification("error", "剪贴板读取失败", "无法访问系统剪贴板: " + e.message);
+      showTopNotification("error", t("剪贴板读取失败"), t("无法访问系统剪贴板: ") + e.message);
     }
   });
 
@@ -1655,7 +1816,7 @@
     if (!fill) {
       showTopNotification(
         "info",
-        "上传中",
+        t("上传中"),
         '<div class="progress-wrap">' +
           '<div class="progress-track"><div class="progress-fill" id="uploadProgressFill"></div></div>' +
           '<div class="progress-meta">' +
@@ -1676,7 +1837,7 @@
     const atEnd = total > 0 && loaded >= total;
     fill.classList.toggle("pending", atEnd);
     document.getElementById("uploadProgressPct").textContent =
-      atEnd ? "等待服务器处理..." : pct.toFixed(0) + "%";
+      atEnd ? t("等待服务器处理...") : pct.toFixed(0) + "%";
   }
 
   putBtn.addEventListener("click", async function () {
@@ -1685,16 +1846,16 @@
     const text = document.getElementById("putText").value.trim();
 
     if (currentPutType === "text" && !text) {
-      showTopNotification("error", "提示", "请输入要分享的文本内容");
+      showTopNotification("error", t("提示"), t("请输入要分享的文本内容"));
       return;
     }
     if (currentPutType === "file" && !selectedFile) {
-      showTopNotification("error", "提示", "请选择要分享的文件");
+      showTopNotification("error", t("提示"), t("请选择要分享的文件"));
       return;
     }
 
     putBtn.disabled = true;
-    putBtnText.textContent = "上传中...";
+    putBtnText.textContent = t("上传中...");
 
     // Total is known up front: the file size, or the encoded byte length of
     // the text (not .length, which counts UTF-16 units and under-counts CJK).
@@ -1726,7 +1887,7 @@
         makeBody,
         headers,
         function (loaded, total) { showUploadProgress(loaded, total || totalBytes); },
-        function (msg) { showTopNotification("info", "网络重试中", msg); }
+        function (msg) { showTopNotification("info", t("网络重试中"), msg); }
       );
       const data = JSON.parse(responseText);
       const generatedKey = data.share_key;
@@ -1734,28 +1895,28 @@
       // 1. Success Notification AT THE VERY TOP
       const successHtml = `
         <div class="key-hero">
-          <div style="font-size:13px; color:var(--text-secondary);">分享成功！您的 Share Key 为：</div>
+          <div style="font-size:13px; color:var(--text-secondary);">${t("分享成功！您的 Share Key 为：")}</div>
           <div class="key-value">${escapeHtml(generatedKey)}</div>
           <div class="key-action-bar">
             <button class="btn-primary btn-sm" style="flex:1;" id="topCopyKeyBtn">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-              复制 Share Key
+              ${t("复制 Share Key")}
             </button>
             <button class="btn-secondary btn-sm" style="flex:1;" id="topJumpGetBtn">
-              前往接收
+              ${t("前往接收")}
             </button>
           </div>
         </div>
       `;
-      showTopNotification("ok", "分享成功", successHtml);
+      showTopNotification("ok", t("分享成功"), successHtml);
 
       // Bind copy button
       document.getElementById("topCopyKeyBtn").addEventListener("click", async function () {
         try {
           await navigator.clipboard.writeText(generatedKey);
-          showToast("Share Key 已复制到剪贴板");
+          showToast(t("Share Key 已复制到剪贴板"));
         } catch (e) {
-          showToast("复制失败，请手动选择复制");
+          showToast(t("复制失败，请手动选择复制"));
         }
       });
 
@@ -1772,10 +1933,10 @@
       document.getElementById("putKey").value = "";
 
     } catch (e) {
-      showTopNotification("error", "分享失败", "错误信息: " + e.message);
+      showTopNotification("error", t("分享失败"), t("错误信息: ") + e.message);
     } finally {
       putBtn.disabled = false;
-      putBtnText.textContent = "立即分享";
+      putBtnText.textContent = t("立即分享");
     }
   });
 
@@ -1796,17 +1957,17 @@
 
     const key = document.getElementById("getKey").value.trim();
     if (!key) {
-      showTopNotification("error", "提示", "请输入 Share Key");
+      showTopNotification("error", t("提示"), t("请输入 Share Key"));
       return;
     }
 
     getBtn.disabled = true;
-    showTopNotification("info", "获取中", "正在从服务器检索数据...");
+    showTopNotification("info", t("获取中"), t("正在从服务器检索数据..."));
 
     try {
       const url = getServerUrl() + "/get/" + encodeURIComponent(key);
       const resp = await fetchWithRetry(url, { headers: apiHeaders() }, function (msg) {
-        showTopNotification("info", "网络重试中", msg);
+        showTopNotification("info", t("网络重试中"), msg);
       });
 
       const contentType = resp.headers.get("Content-Type") || "";
@@ -1816,19 +1977,19 @@
         const text = await resp.text();
         getContentResult.style.display = "flex";
         getContentResult.innerHTML = `
-          <label class="field-label">获取到的文本内容</label>
+          <label class="field-label">${t("获取到的文本内容")}</label>
           <pre class="text-view">${escapeHtml(text)}</pre>
           <button class="btn-secondary" id="copyGetTextBtn">
             <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-            复制文本内容
+            ${t("复制文本内容")}
           </button>
         `;
         document.getElementById("copyGetTextBtn").addEventListener("click", async function () {
           try {
             await navigator.clipboard.writeText(text);
-            showToast("文本已复制到剪贴板");
+            showToast(t("文本已复制到剪贴板"));
           } catch (e) {
-            showToast("复制失败");
+            showToast(t("复制失败"));
           }
         });
       } else {
@@ -1839,7 +2000,7 @@
 
         getContentResult.style.display = "flex";
         getContentResult.innerHTML = `
-          <label class="field-label">文件准备就绪</label>
+          <label class="field-label">${t("文件准备就绪")}</label>
           <div class="file-preview">
             <div class="file-preview-left">
               <div class="file-preview-icon">
@@ -1853,7 +2014,7 @@
           </div>
           <a class="btn-primary" href="${dlUrl}" download="${escapeHtml(filename)}" id="autoDlLink" style="text-decoration:none;">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            下载文件 (${formatBytes(blob.size)})
+            ${t("下载文件")} (${formatBytes(blob.size)})
           </a>
         `;
 
@@ -1864,10 +2025,10 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        showToast("已开始下载 " + filename);
+        showToast(t("已开始下载 ") + filename);
       }
     } catch (e) {
-      showTopNotification("error", "获取失败", "无法获取内容: " + e.message);
+      showTopNotification("error", t("获取失败"), t("无法获取内容: ") + e.message);
     } finally {
       getBtn.disabled = false;
     }
@@ -1876,7 +2037,7 @@
   // ---------- LIST (列表) ----------
   async function loadList() {
     const body = document.getElementById("listBody");
-    body.innerHTML = '<div class="empty-state">正在加载公开分享...</div>';
+    body.innerHTML = '<div class="empty-state">' + t('正在加载公开分享...') + '</div>';
 
     try {
       const url = getServerUrl() + "/list";
@@ -1885,7 +2046,7 @@
       body.innerHTML = "";
 
       if (!items || !items.length) {
-        body.innerHTML = '<div class="empty-state">暂无公开分享记录</div>';
+        body.innerHTML = '<div class="empty-state">' + t('暂无公开分享记录') + '</div>';
         return;
       }
 
@@ -1902,7 +2063,7 @@
 
         const meta = document.createElement("div");
         meta.className = "list-item-meta";
-        meta.textContent = (item.kind === "file" ? "文件" : "文本") + (item.raw_file_name ? " · " + item.raw_file_name : "");
+        meta.textContent = (item.kind === "file" ? t("文件") : t("文本")) + (item.raw_file_name ? " · " + item.raw_file_name : "");
 
         left.appendChild(keyEl);
         left.appendChild(meta);
@@ -1912,7 +2073,7 @@
 
         const getBtnItem = document.createElement("button");
         getBtnItem.className = "btn-secondary btn-sm";
-        getBtnItem.textContent = "获取";
+        getBtnItem.textContent = t("获取");
         getBtnItem.addEventListener("click", function () {
           document.getElementById("tabGet").click();
           document.getElementById("getKey").value = item.share_key;
@@ -1922,19 +2083,19 @@
         const delBtnItem = document.createElement("button");
         delBtnItem.className = "btn-secondary btn-sm";
         delBtnItem.style.color = "var(--danger)";
-        delBtnItem.textContent = "删除";
+        delBtnItem.textContent = t("删除");
         delBtnItem.addEventListener("click", async function () {
-          if (!confirm("确认删除 Share Key [" + item.share_key + "] 吗？")) return;
+          if (!confirm(t("确认删除 Share Key [") + item.share_key + t("] 吗？"))) return;
           delBtnItem.disabled = true;
           try {
             await fetchWithRetry(
               getServerUrl() + "/delete/" + encodeURIComponent(item.share_key),
               { method: "DELETE", headers: apiHeaders() }
             );
-            showToast("已删除 " + item.share_key);
+            showToast(t("已删除 ") + item.share_key);
             loadList();
           } catch (e) {
-            alert("删除失败: " + e.message);
+            alert(t("删除失败: ") + e.message);
             delBtnItem.disabled = false;
           }
         });
@@ -1947,7 +2108,7 @@
         body.appendChild(row);
       });
     } catch (e) {
-      body.innerHTML = '<div class="empty-state" style="color:var(--danger)">加载失败: ' + escapeHtml(e.message) + '</div>';
+      body.innerHTML = '<div class="empty-state" style="color:var(--danger)">' + t('加载失败: ') + escapeHtml(e.message) + '</div>';
     }
   }
 
@@ -1967,7 +2128,7 @@
           // swap instead of silently serving a stale UI.
           function promptUpdate(worker) {
             if (!worker) return;
-            showToast("有新版本，正在更新…");
+            showToast(t("有新版本，正在更新…"));
             worker.postMessage("skip-waiting");
           }
 
